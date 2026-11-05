@@ -635,30 +635,36 @@ function CarBuilder.create(build): Model
 		end
 	end
 
-	local seat = Instance.new("VehicleSeat")
-	seat.Name = "Seat"
-	seat.Size = Vector3.new(1.4, 0.3, 1.4)
-	seat.CFrame = chassis.CFrame * CFrame.new(-0.55, 1.05, -1.0)
-	seat.Anchored = true
+	local seat = model:FindFirstChildWhichIsA("VehicleSeat", true)
+	if seat then
+		seat.Name = "Seat"
+		World.weld(chassis, seat)
+	else
+		seat = Instance.new("VehicleSeat")
+		seat.Name = "Seat"
+		seat.Size = Vector3.new(1.4, 0.3, 1.4)
+		seat.CFrame = chassis.CFrame * CFrame.new(-0.55, 1.05, -1.0)
+		seat.Parent = model
+		smooth(seat)
+		World.weld(chassis, seat)
+	end
+	seat.Anchored = false
 	seat.CanCollide = false
 	seat.Massless = true
-	seat.Transparency = 1
 	seat.Disabled = true
 	seat.MaxSpeed = 0
 	seat.Torque = 0
 	seat.TurnSpeed = 0
 	seat.HeadsUpDisplay = false
-	seat.Parent = model
-	smooth(seat)
-	World.weld(chassis, seat)
 
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "SitPrompt"
 	prompt.ActionText = "Сесть"
-	prompt.ObjectText = "Седан"
-	prompt.MaxActivationDistance = 10
+	prompt.ObjectText = "Машина"
+	prompt.MaxActivationDistance = 14
 	prompt.RequiresLineOfSight = false
-	prompt.Enabled = false
+	prompt.Enabled = true
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
 	prompt.Parent = chassis
 
 	CarBuilder.applyTune(model, build)

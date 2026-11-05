@@ -36,10 +36,10 @@ function GarageBuilder.build(origin: CFrame): Model
 		name = "Floor",
 		size = Vector3.new(30, 1, 44),
 		cframe = at(0, -0.5, 2),
-		color = CONCRETE,
-		material = Enum.Material.Concrete,
+		color = Color3.fromRGB(92, 90, 86),
+		material = Enum.Material.DiamondPlate,
 	})
-	World.tile(floor, "rbxassetid://7547337977", Enum.NormalId.Top, 12)
+	World.tile(floor, "rbxassetid://7547337977", Enum.NormalId.Top, 8)
 	local apron = World.part(model, {
 		name = "Apron",
 		size = Vector3.new(30, 1, 24),
@@ -339,7 +339,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local slot = World.part(model, {
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
-		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y + 0.05, 2), Vector3.new(0, Config.CHASSIS_Y + 0.05, 24)),
+		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y + 0.05, 62), Vector3.new(0, Config.CHASSIS_Y + 0.05, 100)),
 		transparency = 1,
 		collide = false,
 		shadow = false,
@@ -349,7 +349,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "Spawn"
 	spawn.Size = Vector3.new(6, 0.3, 6)
-	spawn.CFrame = CFrame.lookAt(Vector3.new(0, 0.15, 30), Vector3.new(0, 0.15, 0))
+	spawn.CFrame = CFrame.lookAt(Vector3.new(7, 0.2, 62), Vector3.new(0, 0.2, 62))
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
@@ -394,6 +394,86 @@ function GarageBuilder.build(origin: CFrame): Model
 	signText.TextScaled = true
 	signText.Text = "ВЫЕХАТЬ"
 	signText.Parent = sign
+
+	local road = World.part(model, {
+		name = "Street",
+		size = Vector3.new(22, 1, 170),
+		cframe = at(0, -0.52, 110),
+		color = ASPHALT,
+		material = Enum.Material.Asphalt,
+	})
+	World.tile(road, "rbxassetid://7551987784", Enum.NormalId.Top, 14)
+	for z = 28, 180, 10 do
+		World.part(model, {
+			name = "LaneDash",
+			size = Vector3.new(0.35, 0.06, 4),
+			cframe = at(0, 0.04, z),
+			color = Color3.fromRGB(230, 228, 216),
+			material = Enum.Material.SmoothPlastic,
+			collide = false,
+			shadow = false,
+		})
+	end
+	for _, side in { -1, 1 } do
+		local walk = World.part(model, {
+			name = "Sidewalk",
+			size = Vector3.new(6, 1.05, 170),
+			cframe = at(side * 16, -0.42, 110),
+			color = Color3.fromRGB(138, 136, 130),
+			material = Enum.Material.Concrete,
+		})
+		World.tile(walk, "rbxassetid://7547337977", Enum.NormalId.Top, 6)
+		World.part(model, {
+			name = "Curb",
+			size = Vector3.new(0.7, 0.28, 170),
+			cframe = at(side * 12.6, 0.12, 110),
+			color = Color3.fromRGB(210, 208, 200),
+			material = Enum.Material.Concrete,
+		})
+	end
+
+	local shells = {
+		{ x = -30, z = 42, w = 16, d = 18, h = 14, brick = true },
+		{ x = -32, z = 72, w = 18, d = 16, h = 22, brick = false },
+		{ x = -29, z = 104, w = 14, d = 20, h = 12, brick = true },
+		{ x = 30, z = 50, w = 16, d = 18, h = 18, brick = false },
+		{ x = 31, z = 84, w = 18, d = 22, h = 28, brick = true },
+		{ x = 29, z = 122, w = 14, d = 16, h = 11, brick = false },
+	}
+	for index, shell in shells do
+		local wallColor = if shell.brick then Color3.fromRGB(122, 74, 62) else Color3.fromRGB(128, 128, 124)
+		local wallMat = if shell.brick then Enum.Material.Brick else Enum.Material.Concrete
+		World.part(model, {
+			name = "Building" .. tostring(index),
+			size = Vector3.new(shell.w, shell.h, shell.d),
+			cframe = at(shell.x, shell.h * 0.5, shell.z),
+			color = wallColor,
+			material = wallMat,
+		})
+		World.part(model, {
+			name = "Roof" .. tostring(index),
+			size = Vector3.new(shell.w + 1.2, 0.45, shell.d + 1.2),
+			cframe = at(shell.x, shell.h + 0.2, shell.z),
+			color = Color3.fromRGB(78, 82, 88),
+			material = Enum.Material.Metal,
+			reflectance = 0.25,
+		})
+		local glass = World.part(model, {
+			name = "Windows" .. tostring(index),
+			size = Vector3.new(shell.w + 0.15, shell.h * 0.45, shell.d * 0.72),
+			cframe = at(shell.x, shell.h * 0.62, shell.z),
+			color = Color3.fromRGB(168, 196, 210),
+			material = Enum.Material.Glass,
+			transparency = 0.35,
+			reflectance = 0.15,
+			collide = false,
+		})
+		local glow = Instance.new("PointLight")
+		glow.Color = Color3.fromRGB(255, 214, 160)
+		glow.Range = 16
+		glow.Brightness = 0.6
+		glow.Parent = glass
+	end
 
 	model:PivotTo(origin)
 	local carriage = model:FindFirstChild("LiftCarriage")

@@ -78,6 +78,9 @@ function ProfileService.load(player: Player)
 		end
 	else
 		sessionOnly = true
+		if data.money <= 0 and data.speed == 0 and data.acceleration == 0 and data.grip == 0 and data.weight == 0 then
+			data.money = Config.STARTING_MONEY
+		end
 	end
 	cache[player] = {
 		data = data,

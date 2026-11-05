@@ -123,7 +123,7 @@ end
 local function seatPlayer(player: Player, model: Model)
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	local seat = model:FindFirstChild("Seat")
+	local seat = model:FindFirstChild("Seat", true)
 	if humanoid and seat and seat:IsA("VehicleSeat") then
 		seat.Disabled = false
 		seat:Sit(humanoid)
@@ -187,7 +187,7 @@ local function goGarage(player: Player)
 	end
 	session.car:PivotTo(session.garage.CarSlot.CFrame)
 	CarBuilder.setParked(session.car, true)
-	sitPrompt(session.car, false)
+	sitPrompt(session.car, true)
 	session.mode = "garage"
 	session.telemetry = nil
 	player.RespawnLocation = session.garage.Spawn
@@ -374,10 +374,13 @@ local function giveGarage(player: Player)
 	local chassis = car.PrimaryPart
 	local sit = chassis and chassis:FindFirstChild("SitPrompt")
 	if sit and sit:IsA("ProximityPrompt") then
+		sit.Enabled = true
 		sit.Triggered:Connect(function(who)
-			if who == player and sessions[player] and sessions[player].mode == "proving" then
-				seatPlayer(player, car)
+			if who ~= player or not sessions[player] then
+				return
 			end
+			CarBuilder.setParked(car, false)
+			seatPlayer(player, car)
 		end)
 	end
 	local button = garage:FindFirstChild("ExitButton", true)
