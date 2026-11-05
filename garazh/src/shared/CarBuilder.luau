@@ -635,7 +635,10 @@ function CarBuilder.create(build): Model
 		end
 	end
 
-	local seat = model:FindFirstChildWhichIsA("VehicleSeat", true)
+	local seat = model:FindFirstChild("DriveSeat", true)
+	if not (seat and seat:IsA("VehicleSeat")) then
+		seat = model:FindFirstChildWhichIsA("VehicleSeat", true)
+	end
 	if seat then
 		seat.Name = "Seat"
 		World.weld(chassis, seat)

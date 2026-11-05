@@ -369,7 +369,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		name = "ExitButton",
 		size = Vector3.new(0.9, 0.28, 0.9),
 		cframe = at(8.5, 3.2, 13.5),
-		color = Color3.fromRGB(176, 64, 48),
+		color = Color3.fromRGB(214, 168, 72),
 		material = Enum.Material.Metal,
 		reflectance = 0.12,
 	})
@@ -432,48 +432,164 @@ function GarageBuilder.build(origin: CFrame): Model
 		})
 	end
 
-	local shells = {
-		{ x = -30, z = 42, w = 16, d = 18, h = 14, brick = true },
-		{ x = -32, z = 72, w = 18, d = 16, h = 22, brick = false },
-		{ x = -29, z = 104, w = 14, d = 20, h = 12, brick = true },
-		{ x = 30, z = 50, w = 16, d = 18, h = 18, brick = false },
-		{ x = 31, z = 84, w = 18, d = 22, h = 28, brick = true },
-		{ x = 29, z = 122, w = 14, d = 16, h = 11, brick = false },
-	}
-	for index, shell in shells do
-		local wallColor = if shell.brick then Color3.fromRGB(122, 74, 62) else Color3.fromRGB(128, 128, 124)
-		local wallMat = if shell.brick then Enum.Material.Brick else Enum.Material.Concrete
+	for i = -5, 5 do
 		World.part(model, {
+			name = "Crosswalk",
+			size = Vector3.new(1.15, 0.05, 8),
+			cframe = at(i * 1.7, 0.05, 40),
+			color = Color3.fromRGB(236, 234, 226),
+			material = Enum.Material.SmoothPlastic,
+			collide = false,
+			shadow = false,
+		})
+	end
+	for _, side in { -1, 1 } do
+		World.part(model, {
+			name = "LaneEdge",
+			size = Vector3.new(0.22, 0.05, 160),
+			cframe = at(side * 9.2, 0.05, 115),
+			color = Color3.fromRGB(232, 230, 220),
+			material = Enum.Material.SmoothPlastic,
+			collide = false,
+			shadow = false,
+		})
+	end
+
+	local function shop(index: number, spec)
+		local face = if spec.x > 0 then -1 else 1
+		local body = World.part(model, {
 			name = "Building" .. tostring(index),
-			size = Vector3.new(shell.w, shell.h, shell.d),
-			cframe = at(shell.x, shell.h * 0.5, shell.z),
-			color = wallColor,
-			material = wallMat,
+			size = Vector3.new(spec.w, spec.h, spec.d),
+			cframe = at(spec.x, spec.h * 0.5, spec.z),
+			color = spec.color,
+			material = spec.material,
+		})
+		if spec.brickTex then
+			World.tile(body, "rbxassetid://7547630026", if face < 0 then Enum.NormalId.Left else Enum.NormalId.Right, 6)
+		end
+		World.part(model, {
+			name = "Cornice" .. tostring(index),
+			size = Vector3.new(spec.w + 0.8, 0.45, spec.d + 0.8),
+			cframe = at(spec.x, spec.h - 0.2, spec.z),
+			color = Color3.fromRGB(86, 88, 92),
+			material = Enum.Material.Concrete,
 		})
 		World.part(model, {
 			name = "Roof" .. tostring(index),
-			size = Vector3.new(shell.w + 1.2, 0.45, shell.d + 1.2),
-			cframe = at(shell.x, shell.h + 0.2, shell.z),
-			color = Color3.fromRGB(78, 82, 88),
-			material = Enum.Material.Metal,
-			reflectance = 0.25,
+			size = Vector3.new(spec.w + spec.over, spec.roofH, spec.d + spec.over),
+			cframe = at(spec.x, spec.h + spec.roofH * 0.5, spec.z),
+			color = spec.roofColor,
+			material = spec.roofMat,
+			reflectance = 0.18,
 		})
-		local glass = World.part(model, {
-			name = "Windows" .. tostring(index),
-			size = Vector3.new(shell.w + 0.15, shell.h * 0.45, shell.d * 0.72),
-			cframe = at(shell.x, shell.h * 0.62, shell.z),
-			color = Color3.fromRGB(168, 196, 210),
-			material = Enum.Material.Glass,
-			transparency = 0.35,
-			reflectance = 0.15,
-			collide = false,
+		local doorX = spec.x + face * (spec.w * 0.5 + 0.08)
+		World.part(model, {
+			name = "Door" .. tostring(index),
+			size = Vector3.new(0.25, 3.4, 2.2),
+			cframe = at(doorX, 1.7, spec.z - spec.d * 0.18),
+			color = Color3.fromRGB(58, 46, 38),
+			material = Enum.Material.Wood,
 		})
-		local glow = Instance.new("PointLight")
-		glow.Color = Color3.fromRGB(255, 214, 160)
-		glow.Range = 16
-		glow.Brightness = 0.6
-		glow.Parent = glass
+		local floors = math.clamp(math.floor((spec.h - 4) / 3.6), 1, 6)
+		for level = 1, floors do
+			local y = 4.2 + (level - 1) * 3.5
+			for pane = -1, 1 do
+				local glass = World.part(model, {
+					name = "Pane",
+					size = Vector3.new(0.16, 1.7, 1.5),
+					cframe = at(doorX, y, spec.z + pane * 2.3),
+					color = Color3.fromRGB(186, 214, 224),
+					material = Enum.Material.Glass,
+					transparency = 0.28,
+					reflectance = 0.22,
+					collide = false,
+				})
+				if level == floors and pane == 0 then
+					local lamp = Instance.new("PointLight")
+					lamp.Color = Color3.fromRGB(255, 220, 180)
+					lamp.Range = 12
+					lamp.Brightness = 0.45
+					lamp.Parent = glass
+				end
+			end
+		end
 	end
+
+	local block = {
+		{ x = -28, z = 48, w = 14, d = 16, h = 11, color = Color3.fromRGB(140, 78, 64), material = Enum.Material.Brick, roofH = 0.5, over = 1.4, roofColor = Color3.fromRGB(92, 58, 48), roofMat = Enum.Material.Brick, brickTex = false },
+		{ x = -31, z = 74, w = 16, d = 18, h = 22, color = Color3.fromRGB(168, 164, 156), material = Enum.Material.Concrete, roofH = 1.2, over = 0.6, roofColor = Color3.fromRGB(70, 74, 80), roofMat = Enum.Material.Metal, brickTex = true },
+		{ x = -27, z = 102, w = 12, d = 20, h = 8, color = Color3.fromRGB(118, 92, 74), material = Enum.Material.Brick, roofH = 0.4, over = 2, roofColor = Color3.fromRGB(64, 68, 72), roofMat = Enum.Material.DiamondPlate, brickTex = false },
+		{ x = -30, z = 132, w = 18, d = 14, h = 30, color = Color3.fromRGB(96, 108, 118), material = Enum.Material.Concrete, roofH = 0.8, over = 0.4, roofColor = Color3.fromRGB(40, 44, 48), roofMat = Enum.Material.Metal, brickTex = true },
+		{ x = 28, z = 44, w = 15, d = 17, h = 16, color = Color3.fromRGB(150, 146, 138), material = Enum.Material.Concrete, roofH = 0.6, over = 1, roofColor = Color3.fromRGB(82, 86, 90), roofMat = Enum.Material.Metal, brickTex = true },
+		{ x = 32, z = 72, w = 13, d = 22, h = 9, color = Color3.fromRGB(126, 70, 58), material = Enum.Material.Brick, roofH = 1.6, over = 1.8, roofColor = Color3.fromRGB(110, 72, 52), roofMat = Enum.Material.Wood, brickTex = false },
+		{ x = 27, z = 104, w = 18, d = 15, h = 26, color = Color3.fromRGB(176, 172, 164), material = Enum.Material.Concrete, roofH = 0.45, over = 0.5, roofColor = Color3.fromRGB(58, 62, 68), roofMat = Enum.Material.DiamondPlate, brickTex = false },
+		{ x = 30, z = 136, w = 14, d = 18, h = 13, color = Color3.fromRGB(104, 98, 92), material = Enum.Material.Brick, roofH = 0.7, over = 1.2, roofColor = Color3.fromRGB(74, 78, 84), roofMat = Enum.Material.Metal, brickTex = false },
+	}
+	for index, spec in block do
+		shop(index, spec)
+	end
+
+	for _, z in { 34, 62, 90, 118, 146 } do
+		for _, side in { -1, 1 } do
+			World.part(model, {
+				name = "LampPole",
+				size = Vector3.new(0.35, 8, 0.35),
+				cframe = at(side * 14.4, 4, z),
+				color = Color3.fromRGB(48, 50, 54),
+				material = Enum.Material.Metal,
+				reflectance = 0.2,
+			})
+			local head = World.part(model, {
+				name = "LampHead",
+				size = Vector3.new(1.4, 0.28, 0.7),
+				cframe = at(side * 14.4, 8.1, z),
+				color = Color3.fromRGB(226, 220, 196),
+				material = Enum.Material.Glass,
+				transparency = 0.15,
+				collide = false,
+			})
+			local streetLight = Instance.new("PointLight")
+			streetLight.Color = Color3.fromRGB(255, 226, 186)
+			streetLight.Range = 28
+			streetLight.Brightness = 1.1
+			streetLight.Parent = head
+		end
+	end
+
+	World.part(model, {
+		name = "Shelf",
+		size = Vector3.new(1.2, 4.2, 8),
+		cframe = at(-13.2, 2.1, -2),
+		color = Color3.fromRGB(62, 64, 68),
+		material = Enum.Material.Metal,
+		reflectance = 0.12,
+	})
+	for _, z in { -4.6, -2, 0.6 } do
+		World.part(model, {
+			name = "Crate",
+			size = Vector3.new(0.9, 0.7, 0.9),
+			cframe = at(-13.2, 4.5, z),
+			color = Color3.fromRGB(112, 78, 48),
+			material = Enum.Material.Wood,
+		})
+	end
+	local bayLight = World.part(model, {
+		name = "BayLamp",
+		size = Vector3.new(6, 0.2, 1.2),
+		cframe = at(0, 8.6, 2),
+		color = Color3.fromRGB(236, 230, 210),
+		material = Enum.Material.Glass,
+		transparency = 0.1,
+		collide = false,
+	})
+	local bayGlow = Instance.new("SpotLight")
+	bayGlow.Face = Enum.NormalId.Bottom
+	bayGlow.Angle = 80
+	bayGlow.Range = 24
+	bayGlow.Brightness = 1.5
+	bayGlow.Color = Color3.fromRGB(255, 236, 210)
+	bayGlow.Shadows = true
+	bayGlow.Parent = bayLight
 
 	model:PivotTo(origin)
 	local carriage = model:FindFirstChild("LiftCarriage")
