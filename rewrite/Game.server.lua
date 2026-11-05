@@ -50,8 +50,8 @@ if baseplate then
 	baseplate:Destroy()
 end
 
-local lot = part("Lot", Vector3.new(280, 1, 220), CFrame.new(0, -0.5, 20), Enum.Material.Concrete, Color3.fromRGB(120, 122, 124))
-paint(lot, "rbxassetid://6372755229", 18)
+local lot = part("Lot", Vector3.new(2000, 4, 2000), CFrame.new(0, -2, 20), Enum.Material.Asphalt, Color3.fromRGB(42, 44, 46))
+paint(lot, "rbxassetid://6372755229", 24)
 
 local road = part("Road", Vector3.new(28, 0.2, 160), CFrame.new(0, 0.15, 40), Enum.Material.Asphalt, Color3.fromRGB(38, 40, 42))
 paint(road, "rbxassetid://6372755229", 10)
@@ -66,22 +66,22 @@ paint(pad, "rbxassetid://6372755229", 12)
 part("PadLine", Vector3.new(0.3, 0.05, 80), CFrame.new(0, 0.32, 250), Enum.Material.SmoothPlastic, Color3.fromRGB(230, 220, 160))
 
 local slots = {
-	Vector3.new(-48, 0, -20),
-	Vector3.new(-48, 0, 16),
-	Vector3.new(48, 0, -20),
-	Vector3.new(48, 0, 16),
+	Vector3.new(-70, 0, -30),
+	Vector3.new(-70, 0, 30),
+	Vector3.new(70, 0, -30),
+	Vector3.new(70, 0, 30),
 }
 
 local function garage(origin, face)
-	local floor = part("GarageFloor", Vector3.new(22, 0.25, 16), CFrame.new(origin + Vector3.new(0, 0.2, 0)), Enum.Material.DiamondPlate, Color3.fromRGB(88, 90, 94))
-	paint(floor, "rbxassetid://143657515", 6)
-	part("BackWall", Vector3.new(22, 8, 1), CFrame.new(origin + Vector3.new(0, 4, -face * 8)), Enum.Material.Concrete, Color3.fromRGB(168, 166, 160))
-	part("SideA", Vector3.new(1, 8, 16), CFrame.new(origin + Vector3.new(-11, 4, 0)), Enum.Material.Concrete, Color3.fromRGB(158, 156, 150))
-	part("SideB", Vector3.new(1, 8, 16), CFrame.new(origin + Vector3.new(11, 4, 0)), Enum.Material.Concrete, Color3.fromRGB(158, 156, 150))
-	part("Roof", Vector3.new(22, 0.5, 16), CFrame.new(origin + Vector3.new(0, 8.2, 0)), Enum.Material.Metal, Color3.fromRGB(62, 66, 72))
-	local window = part("Window", Vector3.new(6, 2.2, 0.3), CFrame.new(origin + Vector3.new(0, 5.2, -face * 8)), Enum.Material.Glass, Color3.fromRGB(180, 210, 220))
+	local floor = part("GarageFloor", Vector3.new(36, 0.4, 28), CFrame.new(origin + Vector3.new(0, 0.3, 0)), Enum.Material.DiamondPlate, Color3.fromRGB(88, 90, 94))
+	paint(floor, "rbxassetid://143657515", 8)
+	part("BackWall", Vector3.new(36, 14, 1.2), CFrame.new(origin + Vector3.new(0, 7, -face * 14)), Enum.Material.Concrete, Color3.fromRGB(168, 166, 160))
+	part("SideA", Vector3.new(1.2, 14, 28), CFrame.new(origin + Vector3.new(-18, 7, 0)), Enum.Material.Concrete, Color3.fromRGB(158, 156, 150))
+	part("SideB", Vector3.new(1.2, 14, 28), CFrame.new(origin + Vector3.new(18, 7, 0)), Enum.Material.Concrete, Color3.fromRGB(158, 156, 150))
+	part("Roof", Vector3.new(36, 0.8, 28), CFrame.new(origin + Vector3.new(0, 14.2, 0)), Enum.Material.Metal, Color3.fromRGB(62, 66, 72))
+	local window = part("Window", Vector3.new(10, 3.4, 0.3), CFrame.new(origin + Vector3.new(0, 9, -face * 14)), Enum.Material.Glass, Color3.fromRGB(180, 210, 220))
 	window.Transparency = 0.35
-	part("Bench", Vector3.new(6, 1, 2), CFrame.new(origin + Vector3.new(6, 0.8, -4)), Enum.Material.Wood, Color3.fromRGB(110, 78, 48))
+	part("Bench", Vector3.new(8, 1.2, 2.4), CFrame.new(origin + Vector3.new(8, 1, -6)), Enum.Material.Wood, Color3.fromRGB(110, 78, 48))
 end
 
 for index, origin in slots do
