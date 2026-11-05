@@ -14,11 +14,14 @@ local CarBuilder = require(Shared.CarBuilder)
 local RaceTrackBuilder = require(Shared.RaceTrackBuilder)
 local Checkpoints = require(Shared.Checkpoints)
 local VehicleDriver = require(Shared.VehicleDriver)
+local World = require(Shared.World)
 local ProfileService = require(script.Parent.ProfileService)
 
 ProfileService.start()
 VehicleDriver.bindServer()
 Workspace.Gravity = 196.2
+World.dress()
+World.pad(Vector3.zero, 2200)
 
 local remotesFolder = Instance.new("Folder")
 remotesFolder.Name = "Remotes"

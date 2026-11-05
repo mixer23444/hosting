@@ -323,7 +323,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local slot = World.part(model, {
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
-		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y, 6), Vector3.new(0, Config.CHASSIS_Y, 24)),
+		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y + 0.7, 6), Vector3.new(0, Config.CHASSIS_Y + 0.7, 24)),
 		transparency = 1,
 		collide = false,
 		shadow = false,

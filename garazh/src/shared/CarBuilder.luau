@@ -424,15 +424,25 @@ function CarBuilder.setParked(model: Model, parked: boolean)
 	local seat = model:FindFirstChild("Seat")
 	if seat and seat:IsA("VehicleSeat") then
 		seat.Disabled = parked
+		seat.MaxSpeed = 0
+		seat.Torque = 0
+		seat.TurnSpeed = 0
 	end
 	for _, descendant in model:GetDescendants() do
 		if descendant:IsA("BasePart") then
-			descendant.Anchored = parked
+			-- Only the chassis is held when parked. Wheels stay free so the hinges can spin.
+			descendant.Anchored = parked and descendant.Name == "Chassis"
 		end
 	end
-	if not parked and model.PrimaryPart then
-		model.PrimaryPart.AssemblyLinearVelocity = Vector3.zero
-		model.PrimaryPart.AssemblyAngularVelocity = Vector3.zero
+	local chassis = model.PrimaryPart
+	if chassis then
+		chassis.AssemblyLinearVelocity = Vector3.zero
+		chassis.AssemblyAngularVelocity = Vector3.zero
+		if not parked then
+			pcall(function()
+				chassis:SetNetworkOwner(nil)
+			end)
+		end
 	end
 end
 
@@ -454,7 +464,7 @@ function CarBuilder.create(build): Model
 	chassis.Transparency = 1
 	chassis.Reflectance = 0
 	chassis.Anchored = true
-	chassis.CanCollide = true
+	chassis.CanCollide = false
 	chassis.Massless = false
 	chassis.CastShadow = false
 	smooth(chassis)

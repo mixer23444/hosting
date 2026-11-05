@@ -92,6 +92,16 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 			shadow = false,
 		})
 
+		for side = -1, 1, 2 do
+			World.part(parent, {
+				name = "Curb",
+				size = Vector3.new(1.35, 0.32, length + 0.45),
+				cframe = cf * CFrame.new(side * (width * 0.5 - 0.5), 0.16, 0),
+				color = if side < 0 then Color3.fromRGB(186, 58, 46) else Color3.fromRGB(226, 226, 220),
+				material = Enum.Material.Concrete,
+			})
+		end
+
 		local right = cf.RightVector
 		for side = -1, 1, 2 do
 			local pos = Vector3.new(mid.X, 1.05, mid.Z) + right * side * (width * 0.5 + 0.7)
@@ -142,13 +152,15 @@ function TrackMesh.gate(parent: Instance, index: number, points: { Vector3 }, po
 end
 
 function TrackMesh.ground(parent: Instance, center: Vector3, size: Vector3)
-	World.part(parent, {
-		name = "Verge",
-		size = size,
-		cframe = CFrame.new(center + Vector3.new(0, -1.6, 0)),
-		color = Color3.fromRGB(78, 92, 64),
-		material = Enum.Material.Grass,
+	local thickness = math.max(size.Y, 6)
+	local pad = World.part(parent, {
+		name = "AsphaltPad",
+		size = Vector3.new(size.X, thickness, size.Z),
+		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.04, center.Z),
+		color = Color3.fromRGB(52, 52, 54),
+		material = Enum.Material.Asphalt,
 	})
+	World.tile(pad, "rbxassetid://7551987784", Enum.NormalId.Top, 18)
 end
 
 return TrackMesh

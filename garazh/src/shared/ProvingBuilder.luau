@@ -50,7 +50,7 @@ function ProvingBuilder.build(origin: CFrame): Model
 	model.PrimaryPart = pivot
 
 	local points = ProvingBuilder.points()
-	TrackMesh.ground(model, Vector3.new(74, 0, 116), Vector3.new(240, 2, 300))
+	TrackMesh.ground(model, Vector3.new(74, 0, 116), Vector3.new(900, 8, 900))
 	TrackMesh.lay(model, points, WIDTH)
 
 	-- 1 start, 2 end of straight, 3 corner entry, 4 corner exit.
@@ -63,8 +63,8 @@ function ProvingBuilder.build(origin: CFrame): Model
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
 		cframe = CFrame.lookAt(
-			Vector3.new(0, Config.CHASSIS_Y + 0.35, 8),
-			Vector3.new(0, Config.CHASSIS_Y + 0.35, 40)
+			Vector3.new(0, Config.CHASSIS_Y + 0.7, 8),
+			Vector3.new(0, Config.CHASSIS_Y + 0.7, 40)
 		),
 		transparency = 1,
 		collide = false,

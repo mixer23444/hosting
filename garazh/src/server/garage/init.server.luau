@@ -16,11 +16,14 @@ local ProvingBuilder = require(Shared.ProvingBuilder)
 local Checkpoints = require(Shared.Checkpoints)
 local VehicleDriver = require(Shared.VehicleDriver)
 local GhostLap = require(Shared.GhostLap)
+local World = require(Shared.World)
 local ProfileService = require(script.Parent.ProfileService)
 
 ProfileService.start()
 VehicleDriver.bindServer()
 Workspace.Gravity = 196.2
+World.dress()
+World.pad(Vector3.zero, 2200)
 
 local remotesFolder = Instance.new("Folder")
 remotesFolder.Name = "Remotes"

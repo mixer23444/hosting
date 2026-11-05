@@ -27,7 +27,7 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 	model.PrimaryPart = pivot
 
 	local points = TrackMesh.stadium(LENGTH, RADIUS)
-	TrackMesh.ground(model, Vector3.new(RADIUS, 0, LENGTH * 0.5), Vector3.new(RADIUS * 2 + WIDTH + 220, 2, LENGTH + RADIUS * 2 + 180))
+	TrackMesh.ground(model, Vector3.new(RADIUS, 0, LENGTH * 0.5), Vector3.new(1200, 8, 1200))
 	TrackMesh.lay(model, points, WIDTH)
 
 	-- Eight gates around the short loop. Gate 1 is the start/finish, mid-straight.
@@ -47,8 +47,8 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 			name = "Grid" .. tostring(index),
 			size = Vector3.new(1, 1, 1),
 			cframe = CFrame.lookAt(
-				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.4, along[index]),
-				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.4, along[index] + 40)
+				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.7, along[index]),
+				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.7, along[index] + 40)
 			),
 			transparency = 1,
 			collide = false,

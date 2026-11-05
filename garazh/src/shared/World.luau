@@ -1,5 +1,8 @@
 -- Small part factory. Surfaces stay smooth so materials read as concrete, metal, and paint.
 
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
 local World = {}
 
 export type PartProps = {
@@ -67,6 +70,38 @@ function World.tile(part: BasePart, assetId: string, face: Enum.NormalId, studs:
 	texture.StudsPerTileV = studs
 	texture.Parent = part
 	return texture
+end
+
+function World.dress()
+	local baseplate = Workspace:FindFirstChild("Baseplate")
+	if baseplate then
+		baseplate:Destroy()
+	end
+	if not Lighting:FindFirstChildOfClass("Sky") then
+		local sky = Instance.new("Sky")
+		sky.Name = "GarazhSky"
+		sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+		sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+		sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+		sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+		sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+		sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+		sky.SunAngularSize = 12
+		sky.Parent = Lighting
+	end
+end
+
+function World.pad(center: Vector3, span: number)
+	local thickness = 8
+	local pad = World.part(Workspace, {
+		name = "AsphaltPad",
+		size = Vector3.new(span, thickness, span),
+		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.04, center.Z),
+		color = Color3.fromRGB(52, 52, 54),
+		material = Enum.Material.Asphalt,
+	})
+	World.tile(pad, "rbxassetid://7551987784", Enum.NormalId.Top, 18)
+	return pad
 end
 
 function World.markPaint(part: BasePart)
