@@ -36,7 +36,7 @@ rojo serve race.project.json
 
 `ReserveServer` и `TeleportToPrivateServer` проверяются только на опубликованном плейсе. В Studio резерв сервера не работает: это не баг сборки. Плейс гонки в Studio можно запустить отдельно — круг и реванш идут, денег он не платит.
 
-DataStore — `GarazhProfile_v1`. В Studio включите API Services, иначе деньги живут только до конца сессии. Стартовые 500 кр. — чтобы один раз купить доработку и выехать на полигон без друга.
+DataStore `GarazhProfile_v1` вызывается только на опубликованном сервере. В Studio и в неопубликованном месте сервис не трогается: Play не останавливается на ошибке DataStore, деньги и доработки живут в памяти до конца сессии. Стартовые 500 кр. — чтобы купить доработку и выехать на полигон без друга.
 
 ## Арт
 
@@ -44,4 +44,4 @@ DataStore — `GarazhProfile_v1`. В Studio включите API Services, ин�
 
 ## English
 
-Friends’ race. Open the `garazh` folder with Rojo: `rojo serve default.project.json` for the garage place, `rojo serve race.project.json` for the race place. Connect the Rojo plugin in Studio. Art is textured mesh parts (concrete, asphalt, metal, paint, glass, rubber), not a finished showroom. `TeleportService:ReserveServer` only works on a published race place in the same universe — put both place ids in `src/shared/Config.luau`. The solo ghost lap is a stub. The garage, car, four upgrades, proving pad, and invited race are in code.
+Friends’ race. Open the `garazh` folder with Rojo: `rojo serve default.project.json` for the garage place, `rojo serve race.project.json` for the race place. Connect the Rojo plugin in Studio. Art is textured mesh parts (concrete, asphalt, metal, paint, glass, rubber), not a finished showroom. `TeleportService:ReserveServer` only works on a published race place in the same universe — put both place ids in `src/shared/Config.luau`. Studio Play does not call DataStore; cash and upgrades stay in memory for the session. The solo ghost lap is a stub. The garage, car, four upgrades, proving pad, and invited race are in code.

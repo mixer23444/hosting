@@ -1,9 +1,10 @@
--- Money and the four upgrade tracks. Race place and garage share one DataStore.
--- If Studio has no API access, the profile stays in memory for the session.
+-- Money and the four upgrade tracks. A published server shares one DataStore.
+-- Studio Play on an unpublished place must not call DataStoreService at all:
+-- GetDataStore halts Play on "publish this place" even inside pcall.
 
-local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 
@@ -162,13 +163,22 @@ function ProfileService.start()
 		return
 	end
 	started = true
-	local ok, result = pcall(function()
-		return DataStoreService:GetDataStore(Config.DATASTORE)
-	end)
-	if ok then
-		store = result
+	-- PlaceId/GameId are 0 until the place is published. Do not touch DataStore there.
+	local published = game.PlaceId ~= 0 and game.GameId ~= 0
+	if RunService:IsStudio() or not published then
+		store = nil
 	else
-		warn("[Гараж] DataStore не открылся: " .. tostring(result))
+		local ok, result = pcall(function()
+			return game:GetService("DataStoreService"):GetDataStore(Config.DATASTORE)
+		end)
+		if ok and result ~= nil then
+			store = result
+		else
+			store = nil
+			if not ok then
+				warn("[Гараж] DataStore не открылся, играем в памяти: " .. tostring(result))
+			end
+		end
 	end
 
 	Players.PlayerRemoving:Connect(function(player)
