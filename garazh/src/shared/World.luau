@@ -58,6 +58,17 @@ function World.weld(a: BasePart, b: BasePart)
 	return weld
 end
 
+function World.tile(part: BasePart, assetId: string, face: Enum.NormalId, studs: number)
+	local texture = Instance.new("Texture")
+	texture.Name = "Surface"
+	texture.Texture = assetId
+	texture.Face = face
+	texture.StudsPerTileU = studs
+	texture.StudsPerTileV = studs
+	texture.Parent = part
+	return texture
+end
+
 function World.markPaint(part: BasePart)
 	part:SetAttribute("Paint", true)
 end

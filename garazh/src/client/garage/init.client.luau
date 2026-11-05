@@ -35,12 +35,13 @@ local state = nil
 
 local panel = UiKit.frame(gui, {
 	name = "Panel",
-	size = UDim2.new(0, 340, 1, -24),
+	size = UDim2.fromOffset(280, 0),
 	position = UDim2.new(0, 12, 0, 12),
 	color = UiKit.BG,
 	transparency = 0.12,
-	pad = 12,
+	pad = 10,
 })
+panel.AutomaticSize = Enum.AutomaticSize.Y
 UiKit.stroke(panel)
 local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 6)
@@ -77,19 +78,15 @@ for index, stat in ipairs(Config.STATS) do
 			modeLabel.Text = result.error or "Не купилось."
 		end
 	end)
-	local hint = UiKit.label(holder, Config.STAT_HINT[stat], 12, UiKit.MUTED)
-	hint.Position = UDim2.new(0, 0, 0, 24)
-	hint.Size = UDim2.new(1, 0, 0, 32)
-	hint.TextWrapped = true
 	local level = UiKit.label(holder, "", 13)
-	level.Position = UDim2.new(0, 0, 0, 56)
-	level.Size = UDim2.new(1, 0, 0, 18)
+	level.Position = UDim2.new(0, 0, 0, 30)
+	level.Size = UDim2.new(1, 0, 0, 16)
 	statRows[stat] = { buy = buy, level = level }
 end
 
 local tuneLabel = UiKit.label(row(20), "", 13, UiKit.MUTED)
 tuneLabel.TextWrapped = true
-tuneLabel.Size = UDim2.new(1, 0, 0, 48)
+tuneLabel.Size = UDim2.new(1, 0, 0, 32)
 
 local colorRow = row(21)
 colorRow.Size = UDim2.new(1, 0, 0, 28)
@@ -127,16 +124,33 @@ local driveButton = action(30, "Выехать", function()
 		modeLabel.Text = result.error or ""
 	end
 end)
-action(31, "В гараж", function()
+
+local extra = row(31)
+extra.Size = UDim2.new(1, 0, 0, 28)
+local extraLayout = Instance.new("UIListLayout")
+extraLayout.FillDirection = Enum.FillDirection.Horizontal
+extraLayout.Padding = UDim.new(0, 4)
+extraLayout.Parent = extra
+local function mini(text: string, callback)
+	local button = UiKit.button(extra, text)
+	button.Size = UDim2.new(1 / 3, -3, 1, 0)
+	button.TextScaled = true
+	local limit = Instance.new("UITextSizeConstraint")
+	limit.MaxTextSize = 12
+	limit.MinTextSize = 8
+	limit.Parent = button
+	button.MouseButton1Click:Connect(callback)
+end
+mini("В гараж", function()
 	local result = ReturnGarage:InvokeServer()
 	if result and result.ok == false then
 		modeLabel.Text = result.error or ""
 	end
 end)
-action(32, "На колёса", function()
+mini("На колёса", function()
 	Upright:InvokeServer()
 end)
-action(33, "Призрачный круг", function()
+mini("Призрачный круг", function()
 	local result = Ghost:InvokeServer()
 	modeLabel.Text = (result and result.error) or "Заглушка."
 end)
@@ -145,8 +159,8 @@ local raceButton = action(34, "Гонка с друзьями", function() end)
 
 local racePanel = UiKit.frame(gui, {
 	name = "Race",
-	size = UDim2.new(0, 300, 0, 360),
-	position = UDim2.new(0, 364, 0, 12),
+	size = UDim2.new(0, 280, 0, 320),
+	position = UDim2.new(0, 300, 0, 12),
 	color = UiKit.PANEL,
 	visible = false,
 	pad = 10,

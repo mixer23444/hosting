@@ -1,10 +1,16 @@
--- Sedan assembled from mesh-style parts: painted shell, glass, lamp lenses, rubber tires.
--- Not a single neon brick. Collider is the lower hull; wheels carry the car.
+-- Official Roblox sedan (public model 6418239833): painted body, glass, lamps, wheels.
+-- The chassis and collision tires stay invisible. No neon brick body.
+
+local InsertService = game:GetService("InsertService")
+local AssetService = game:GetService("AssetService")
 
 local Config = require(script.Parent.Config)
 local Physics = require(script.Parent.Physics)
 local World = require(script.Parent.World)
 local VehicleDriver = require(script.Parent.VehicleDriver)
+local SedanMesh = require(script.Parent.SedanMesh)
+
+local SEDAN_MODEL = 6418239833
 
 local CarBuilder = {}
 
@@ -98,7 +104,8 @@ local function addWheel(model: Model, chassis: BasePart, constraints: Folder, na
 	tire.CFrame = wheelCF
 	tire.Color = Color3.fromRGB(18, 18, 18)
 	tire.Material = Enum.Material.SmoothPlastic
-	tire.Reflectance = 0.015
+	tire.Transparency = 1
+	tire.Reflectance = 0
 	tire.Anchored = true
 	tire.CanCollide = true
 	tire.Massless = false
@@ -130,69 +137,231 @@ local function addWheel(model: Model, chassis: BasePart, constraints: Folder, na
 	noHit.Part0 = chassis
 	noHit.Part1 = tire
 	noHit.Parent = tire
+end
 
-	local rim = Instance.new("Part")
-	rim.Name = name .. "Rim"
-	rim.Shape = Enum.PartType.Cylinder
-	rim.Size = Vector3.new(0.8, R * 1.28, R * 1.28)
-	rim.CFrame = wheelCF
-	rim.Color = Color3.fromRGB(154, 156, 160)
-	rim.Material = Enum.Material.Metal
-	rim.Reflectance = 0.4
-	rim.Anchored = true
-	rim.CanCollide = false
-	rim.Massless = true
-	rim.Parent = model
-	smooth(rim)
-	World.weld(tire, rim)
+local WHEEL_NAME = {
+	LF_wheel = "FL",
+	LF_wheel_trim = "FL",
+	RF_wheel = "FR",
+	RF_wheel_trim = "FR",
+	LR_wheel = "RL",
+	LR_wheel_trim = "RL",
+	RR_wheel = "RR",
+	RR_wheel_trim = "RR",
+}
 
-	for spoke = 0, 4 do
-		local blade = Instance.new("Part")
-		blade.Name = name .. "Spoke"
-		blade.Size = Vector3.new(0.08, 0.1, R * 0.62)
-		blade.CFrame = wheelCF * CFrame.Angles(math.rad(spoke * 72), 0, 0) * CFrame.new(0, R * 0.28, 0)
-		blade.Color = Color3.fromRGB(186, 188, 192)
-		blade.Material = Enum.Material.Metal
-		blade.Reflectance = 0.28
-		blade.Anchored = true
-		blade.CanCollide = false
-		blade.Massless = true
-		blade.Parent = model
-		smooth(blade)
-		World.weld(tire, blade)
+local function paintableName(name: string): boolean
+	if string.find(name, "glass", 1, true) then
+		return false
 	end
+	if string.find(name, "light", 1, true) or string.find(name, "wheel", 1, true) then
+		return false
+	end
+	if name == "tire" or name == "grill" or name == "interior" or string.find(name, "trim", 1, true) then
+		return false
+	end
+	if string.find(name, "_int", 1, true) then
+		return false
+	end
+	return true
+end
 
-	local outward = if x >= 0 then 1 else -1
-	local cap = Instance.new("Part")
-	cap.Name = name .. "Cap"
-	cap.Shape = Enum.PartType.Cylinder
-	cap.Size = Vector3.new(0.18, 0.46, 0.46)
-	cap.CFrame = wheelCF * CFrame.new(outward * 0.34, 0, 0)
-	cap.Color = Color3.fromRGB(46, 48, 52)
-	cap.Material = Enum.Material.Metal
-	cap.Reflectance = 0.2
-	cap.Anchored = true
-	cap.CanCollide = false
-	cap.Massless = true
-	cap.Parent = model
-	smooth(cap)
-	World.weld(tire, cap)
+local function hostFor(model: Model, partName: string, position: Vector3): BasePart?
+	local mapped = WHEEL_NAME[partName]
+	if mapped then
+		local wheel = model:FindFirstChild(mapped)
+		if wheel and wheel:IsA("BasePart") then
+			return wheel
+		end
+	end
+	if partName == "tire" or string.find(partName, "wheel", 1, true) then
+		local best: BasePart? = nil
+		local bestDistance = 1e9
+		for _, id in { "FL", "FR", "RL", "RR" } do
+			local wheel = model:FindFirstChild(id)
+			if wheel and wheel:IsA("BasePart") then
+				local distance = (wheel.Position - position).Magnitude
+				if distance < bestDistance then
+					best = wheel
+					bestDistance = distance
+				end
+			end
+		end
+		return best
+	end
+	return nil
+end
 
-	-- Sidewall lip, slightly proud of the tread.
-	local lip = Instance.new("Part")
-	lip.Name = name .. "Sidewall"
-	lip.Shape = Enum.PartType.Cylinder
-	lip.Size = Vector3.new(0.7, R * 2.06, R * 2.06)
-	lip.CFrame = wheelCF
-	lip.Color = Color3.fromRGB(12, 12, 12)
-	lip.Material = Enum.Material.SmoothPlastic
-	lip.Reflectance = 0.01
-	lip.Anchored = true
-	lip.CanCollide = false
-	lip.Massless = true
-	lip.Parent = model
-	smooth(lip)
-	World.weld(tire, lip)
+local function finishVisual(model: Model, chassis: BasePart, part: BasePart)
+	part.Anchored = true
+	part.CanCollide = false
+	part.Massless = true
+	part.CastShadow = true
+	if part.Material == Enum.Material.Neon then
+		part.Material = Enum.Material.Glass
+	end
+	if part.Name == "tire" then
+		part.Color = Color3.fromRGB(18, 18, 18)
+		part.Material = Enum.Material.SmoothPlastic
+		part.Reflectance = 0.02
+	end
+	if paintableName(part.Name) then
+		part:SetAttribute("Paint", true)
+		part.Material = Enum.Material.SmoothPlastic
+		part.Reflectance = 0.16
+	elseif string.find(part.Name, "glass", 1, true) then
+		part.Material = Enum.Material.Glass
+		part.Reflectance = 0.2
+	elseif part.Name == "light_white" then
+		part.Material = Enum.Material.Glass
+		local spot = Instance.new("SpotLight")
+		spot.Face = Enum.NormalId.Front
+		spot.Angle = 50
+		spot.Range = 36
+		spot.Brightness = 1.4
+		spot.Color = Color3.fromRGB(255, 244, 224)
+		spot.Shadows = true
+		spot.Parent = part
+	elseif string.find(part.Name, "light", 1, true) then
+		part.Material = Enum.Material.Glass
+		local glow = Instance.new("PointLight")
+		glow.Color = Color3.fromRGB(180, 36, 28)
+		glow.Range = 8
+		glow.Brightness = 0.5
+		glow.Parent = part
+	end
+	for _, child in part:GetDescendants() do
+		if child:IsA("LuaSourceContainer") then
+			child:Destroy()
+		end
+	end
+	part.Parent = model
+	local host = hostFor(model, part.Name, part.Position) or chassis
+	World.weld(host, part)
+end
+
+local function attachLoaded(model: Model, chassis: BasePart, source: Instance): boolean
+	local points = {}
+	for _, descendant in source:GetDescendants() do
+		if descendant:IsA("BasePart") and WHEEL_NAME[descendant.Name] and string.sub(descendant.Name, -6) == "_wheel" then
+			table.insert(points, descendant.Position)
+		end
+	end
+	if #points ~= 4 then
+		return false
+	end
+	local sum = Vector3.zero
+	for _, point in points do
+		sum += point
+	end
+	local ref = CFrame.new(sum / #points)
+	local shift = CFrame.new(0, R - Config.CHASSIS_Y, 0)
+	local count = 0
+	for _, descendant in source:GetDescendants() do
+		if descendant:IsA("MeshPart") then
+			local clone = descendant:Clone()
+			clone.CFrame = shift * ref:Inverse() * descendant.CFrame
+			finishVisual(model, chassis, clone)
+			count += 1
+		end
+	end
+	return count > 8
+end
+
+local function tryCatalogMesh(model: Model, chassis: BasePart): boolean
+	local ok, container = pcall(function()
+		return InsertService:LoadAsset(SEDAN_MODEL)
+	end)
+	if not ok or typeof(container) ~= "Instance" then
+		return false
+	end
+	local source = nil
+	for _, descendant in container:GetDescendants() do
+		if descendant:IsA("Model") and string.find(string.lower(descendant.Name), "white", 1, true) then
+			source = descendant
+			break
+		end
+	end
+	if not source then
+		for _, descendant in container:GetDescendants() do
+			if descendant.Name == "LF_wheel" then
+				local current = descendant.Parent
+				while current and current ~= container do
+					local count = 0
+					for _, child in current:GetDescendants() do
+						if child.Name == "LF_wheel" then
+							count += 1
+						end
+					end
+					if count == 1 then
+						source = current
+						break
+					end
+					current = current.Parent
+				end
+				break
+			end
+		end
+	end
+	local loaded = false
+	if source then
+		loaded = attachLoaded(model, chassis, source)
+	end
+	container:Destroy()
+	return loaded
+end
+
+local function meshFromId(meshId: string, textureId: string): BasePart
+	local uri = "rbxassetid://" .. meshId
+	local content = nil
+	pcall(function()
+		content = Content.fromUri(uri)
+	end)
+	if content ~= nil then
+		local ok, created = pcall(function()
+			return AssetService:CreateMeshPartAsync(content)
+		end)
+		if ok and typeof(created) == "Instance" and created:IsA("BasePart") then
+			return created
+		end
+	end
+	local part = Instance.new("Part")
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.FileMesh
+	mesh.MeshId = uri
+	if textureId ~= "" then
+		mesh.TextureId = "rbxassetid://" .. textureId
+	end
+	mesh.Parent = part
+	return part
+end
+
+local function attachFallback(model: Model, chassis: BasePart)
+	for _, spec in SedanMesh.PARTS do
+		local part = meshFromId(spec.mesh, spec.tex)
+		part.Name = spec.name
+		if part:IsA("MeshPart") then
+			part.Size = Vector3.new(spec.size[1], spec.size[2], spec.size[3])
+		else
+			-- FileMesh draws at its own size. A failed mesh stays a speck, not a brick.
+			part.Size = Vector3.new(0.2, 0.2, 0.2)
+		end
+		local c = spec.cf
+		part.CFrame = CFrame.new(c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10], c[11], c[12])
+		part.Color = Color3.fromRGB(spec.color[1], spec.color[2], spec.color[3])
+		part.Transparency = spec.trans
+		if spec.kind == "glass" then
+			part.Material = Enum.Material.Glass
+		elseif spec.kind == "metal" then
+			part.Material = Enum.Material.Metal
+			part.Reflectance = 0.3
+		elseif spec.kind == "wheel" then
+			part.Material = if spec.name == "tire" then Enum.Material.SmoothPlastic else Enum.Material.Metal
+		else
+			part.Material = Enum.Material.SmoothPlastic
+		end
+		finishVisual(model, chassis, part)
+	end
 end
 
 local function plate(model: Model, chassis: BasePart, pos: Vector3, face: Enum.NormalId)
@@ -278,16 +447,17 @@ function CarBuilder.create(build): Model
 
 	local chassis = Instance.new("Part")
 	chassis.Name = "Chassis"
-	chassis.Size = Vector3.new(5.55, 0.62, 11.6)
+	chassis.Size = Vector3.new(6.2, 0.5, 14.2)
 	chassis.CFrame = CFrame.new(0, 0, 0)
 	chassis.Material = Enum.Material.SmoothPlastic
-	chassis.Color = Config.paletteColor(build.color or 1)
-	chassis.Reflectance = 0.08
+	chassis.Color = Color3.fromRGB(30, 30, 32)
+	chassis.Transparency = 1
+	chassis.Reflectance = 0
 	chassis.Anchored = true
 	chassis.CanCollide = true
 	chassis.Massless = false
+	chassis.CastShadow = false
 	smooth(chassis)
-	chassis:SetAttribute("Paint", true)
 	chassis.Parent = model
 	model.PrimaryPart = chassis
 
@@ -295,161 +465,21 @@ function CarBuilder.create(build): Model
 	constraints.Name = "Constraints"
 	constraints.Parent = model
 
-	local paint = Color3.fromRGB(42, 46, 51)
-	local metal = Color3.fromRGB(90, 92, 96)
-	local glassColor = Color3.fromRGB(168, 186, 196)
-	local lamp = Color3.fromRGB(236, 236, 228)
-	local tail = Color3.fromRGB(140, 24, 22)
-	local rubber = Color3.fromRGB(20, 20, 20)
+	-- Collision tires sit on the sedan mesh wheel centers. Nose is -Z.
+	addWheel(model, chassis, constraints, "FL", -3.447, -6.181, true)
+	addWheel(model, chassis, constraints, "FR", 3.447, -6.181, true)
+	addWheel(model, chassis, constraints, "RL", -3.732, 6.181, false)
+	addWheel(model, chassis, constraints, "RR", 3.733, 6.181, false)
 
-	-- Shell. Offsets are in chassis space: -Z is the nose.
-	local shell = {
-		{ name = "FrontClip", size = Vector3.new(5.35, 0.48, 1.7), pos = Vector3.new(0, 0.02, -5.35), paint = true },
-		{ name = "RearClip", size = Vector3.new(5.35, 0.5, 1.45), pos = Vector3.new(0, 0.04, 5.15), paint = true },
-		{ name = "Hood", size = Vector3.new(5.15, 0.1, 3.15), pos = Vector3.new(0, 0.48, -3.55), rot = Vector3.new(7, 0, 0), paint = true },
-		{ name = "Trunk", size = Vector3.new(4.9, 0.1, 2.15), pos = Vector3.new(0, 0.58, 3.95), rot = Vector3.new(8, 0, 0), paint = true },
-		{ name = "Cabin", size = Vector3.new(4.7, 0.85, 4.15), pos = Vector3.new(0, 0.72, 0.15), paint = true },
-		{ name = "Roof", size = Vector3.new(4.35, 0.12, 3.15), pos = Vector3.new(0, 1.48, 0.05), paint = true },
-		{ name = "BumperF", size = Vector3.new(5.5, 0.38, 0.32), pos = Vector3.new(0, -0.12, -6.25), paint = true },
-		{ name = "BumperR", size = Vector3.new(5.5, 0.38, 0.32), pos = Vector3.new(0, -0.1, 5.95), paint = true },
-		{ name = "SkirtL", size = Vector3.new(0.16, 0.28, 9.2), pos = Vector3.new(-2.82, -0.22, -0.15), color = rubber, material = Enum.Material.SmoothPlastic },
-		{ name = "SkirtR", size = Vector3.new(0.16, 0.28, 9.2), pos = Vector3.new(2.82, -0.22, -0.15), color = rubber, material = Enum.Material.SmoothPlastic },
-		{ name = "FenderFL", size = Vector3.new(0.28, 0.72, 2.05), pos = Vector3.new(-2.78, 0.18, -3.85), paint = true },
-		{ name = "FenderFR", size = Vector3.new(0.28, 0.72, 2.05), pos = Vector3.new(2.78, 0.18, -3.85), paint = true },
-		{ name = "FenderRL", size = Vector3.new(0.28, 0.72, 2.05), pos = Vector3.new(-2.78, 0.18, 3.65), paint = true },
-		{ name = "FenderRR", size = Vector3.new(0.28, 0.72, 2.05), pos = Vector3.new(2.78, 0.18, 3.65), paint = true },
-		{ name = "Grille", size = Vector3.new(2.5, 0.42, 0.1), pos = Vector3.new(0, 0.12, -6.32), color = Color3.fromRGB(24, 24, 26), material = Enum.Material.Metal, reflectance = 0.15 },
-		{ name = "GrilleSlat", size = Vector3.new(2.3, 0.06, 0.12), pos = Vector3.new(0, 0.22, -6.34), color = metal, material = Enum.Material.Metal, reflectance = 0.3 },
-		{ name = "Trim", size = Vector3.new(5.7, 0.06, 0.08), pos = Vector3.new(0, 0.36, -2.2), color = metal, material = Enum.Material.Metal, reflectance = 0.35 },
-		{ name = "Interior", size = Vector3.new(4.2, 0.45, 3.4), pos = Vector3.new(0, 0.55, 0.1), color = Color3.fromRGB(12, 12, 14), material = Enum.Material.Fabric },
-	}
-
-	for _, spec in shell do
-		panel(model, chassis, {
-			name = spec.name,
-			size = spec.size,
-			pos = spec.pos,
-			rot = spec.rot,
-			color = spec.color or paint,
-			material = spec.material or Enum.Material.SmoothPlastic,
-			reflectance = spec.reflectance or (if spec.paint then 0.14 else 0.04),
-			paint = spec.paint,
-			massless = true,
-		})
+	-- Public Roblox sedan (model 6418239833). Mesh ids are the fallback when LoadAsset cannot run.
+	if not tryCatalogMesh(model, chassis) then
+		attachFallback(model, chassis)
 	end
-
-	local glass = {
-		{ name = "Windshield", size = Vector3.new(4.55, 1.2, 0.08), pos = Vector3.new(0, 1.02, -1.72), rot = Vector3.new(28, 0, 0) },
-		{ name = "RearGlass", size = Vector3.new(4.4, 1.05, 0.08), pos = Vector3.new(0, 1.08, 1.95), rot = Vector3.new(-32, 0, 0) },
-		{ name = "WindowL", size = Vector3.new(0.07, 0.72, 2.15), pos = Vector3.new(-2.36, 1.02, 0.05), rot = Vector3.zero },
-		{ name = "WindowR", size = Vector3.new(0.07, 0.72, 2.15), pos = Vector3.new(2.36, 1.02, 0.05), rot = Vector3.zero },
-	}
-	for _, spec in glass do
-		panel(model, chassis, {
-			name = spec.name,
-			size = spec.size,
-			pos = spec.pos,
-			rot = spec.rot,
-			color = glassColor,
-			material = Enum.Material.Glass,
-			transparency = 0.45,
-			reflectance = 0.22,
-			massless = true,
-		})
-	end
-
-	local leftLamp = panel(model, chassis, {
-		name = "HeadlampL",
-		size = Vector3.new(1.2, 0.36, 0.12),
-		pos = Vector3.new(-1.65, 0.18, -6.34),
-		color = lamp,
-		material = Enum.Material.Glass,
-		transparency = 0.2,
-		reflectance = 0.35,
-		massless = true,
-	})
-	local rightLamp = panel(model, chassis, {
-		name = "HeadlampR",
-		size = Vector3.new(1.2, 0.36, 0.12),
-		pos = Vector3.new(1.65, 0.18, -6.34),
-		color = lamp,
-		material = Enum.Material.Glass,
-		transparency = 0.2,
-		reflectance = 0.35,
-		massless = true,
-	})
-	for _, lampPart in { leftLamp, rightLamp } do
-		local spot = Instance.new("SpotLight")
-		spot.Face = Enum.NormalId.Front
-		spot.Angle = 52
-		spot.Range = 34
-		spot.Brightness = 1.3
-		spot.Color = Color3.fromRGB(255, 244, 224)
-		spot.Shadows = true
-		spot.Parent = lampPart
-	end
-
-	for _, side in { -1, 1 } do
-		local lens = panel(model, chassis, {
-			name = if side < 0 then "TailL" else "TailR",
-			size = Vector3.new(1.15, 0.32, 0.1),
-			pos = Vector3.new(side * 1.75, 0.28, 6.08),
-			color = tail,
-			material = Enum.Material.Glass,
-			transparency = 0.15,
-			reflectance = 0.25,
-			massless = true,
-		})
-		local glow = Instance.new("PointLight")
-		glow.Color = Color3.fromRGB(180, 30, 24)
-		glow.Range = 7
-		glow.Brightness = 0.45
-		glow.Parent = lens
-	end
-
-	panel(model, chassis, {
-		name = "MirrorL",
-		size = Vector3.new(0.12, 0.28, 0.55),
-		pos = Vector3.new(-2.65, 0.78, -1.15),
-		paint = true,
-		reflectance = 0.12,
-		massless = true,
-	})
-	panel(model, chassis, {
-		name = "MirrorR",
-		size = Vector3.new(0.12, 0.28, 0.55),
-		pos = Vector3.new(2.65, 0.78, -1.15),
-		paint = true,
-		reflectance = 0.12,
-		massless = true,
-	})
-
-	for _, side in { -1, 1 } do
-		panel(model, chassis, {
-			name = "Exhaust",
-			size = Vector3.new(0.55, 0.22, 0.22),
-			pos = Vector3.new(side * 0.7, -0.28, 6.2),
-			rot = Vector3.new(0, 90, 0),
-			color = Color3.fromRGB(70, 68, 64),
-			material = Enum.Material.Metal,
-			reflectance = 0.25,
-			shape = "cylinder",
-			massless = true,
-		})
-	end
-
-	plate(model, chassis, Vector3.new(0, -0.08, 6.14), Enum.NormalId.Back)
-	plate(model, chassis, Vector3.new(0, -0.08, -6.42), Enum.NormalId.Front)
-
-	addWheel(model, chassis, constraints, "FL", -2.72, -3.85, true)
-	addWheel(model, chassis, constraints, "FR", 2.72, -3.85, true)
-	addWheel(model, chassis, constraints, "RL", -2.72, 3.7, false)
-	addWheel(model, chassis, constraints, "RR", 2.72, 3.7, false)
 
 	local seat = Instance.new("VehicleSeat")
 	seat.Name = "Seat"
 	seat.Size = Vector3.new(1.4, 0.3, 1.4)
-	seat.CFrame = chassis.CFrame * CFrame.new(-0.55, 0.62, 0.15)
+	seat.CFrame = chassis.CFrame * CFrame.new(-0.55, 1.05, -1.0)
 	seat.Anchored = true
 	seat.CanCollide = false
 	seat.Massless = true

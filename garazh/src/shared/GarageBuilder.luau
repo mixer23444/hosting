@@ -32,20 +32,22 @@ function GarageBuilder.build(origin: CFrame): Model
 	model.PrimaryPart = pivot
 
 	-- Floor and the apron outside the open door (+Z).
-	World.part(model, {
+	local floor = World.part(model, {
 		name = "Floor",
 		size = Vector3.new(30, 1, 26),
 		cframe = at(0, -0.5, -1),
 		color = CONCRETE,
 		material = Enum.Material.Concrete,
 	})
-	World.part(model, {
+	World.tile(floor, "rbxassetid://7547337977", Enum.NormalId.Top, 12)
+	local apron = World.part(model, {
 		name = "Apron",
 		size = Vector3.new(30, 1, 24),
 		cframe = at(0, -0.55, 22),
 		color = ASPHALT,
 		material = Enum.Material.Asphalt,
 	})
+	World.tile(apron, "rbxassetid://7551987784", Enum.NormalId.Top, 14)
 	-- Threshold strip where concrete meets asphalt.
 	World.part(model, {
 		name = "Threshold",
@@ -57,27 +59,30 @@ function GarageBuilder.build(origin: CFrame): Model
 	})
 
 	-- Shell. Open front. Back wall is split so the windows are real openings.
-	World.part(model, {
+	local wallLeft = World.part(model, {
 		name = "WallLeft",
 		size = Vector3.new(0.7, 10, 26),
 		cframe = at(-15.35, 5, -1),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
-	World.part(model, {
+	World.tile(wallLeft, "rbxassetid://7547630026", Enum.NormalId.Right, 8)
+	local wallRight = World.part(model, {
 		name = "WallRight",
 		size = Vector3.new(0.7, 10, 26),
 		cframe = at(15.35, 5, -1),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
-	World.part(model, {
+	World.tile(wallRight, "rbxassetid://7547630026", Enum.NormalId.Left, 8)
+	local wallBack = World.part(model, {
 		name = "WallBackLow",
 		size = Vector3.new(30, 3.4, 0.7),
 		cframe = at(0, 1.7, -14.35),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
+	World.tile(wallBack, "rbxassetid://7547630026", Enum.NormalId.Back, 8)
 	World.part(model, {
 		name = "WallBackHigh",
 		size = Vector3.new(30, 2.2, 0.7),
@@ -165,43 +170,91 @@ function GarageBuilder.build(origin: CFrame): Model
 	sky.Shadows = true
 	sky.Parent = skylight
 
-	-- Lift against the back wall. The car does not sit on it.
+	-- Two-post lift behind the car. The car stays on the floor.
+	local steel = Color3.fromRGB(72, 76, 82)
+	local chrome = Color3.fromRGB(186, 190, 196)
 	local function post(name: string, x: number)
-		World.part(model, {
+		local column = World.part(model, {
 			name = name,
-			size = Vector3.new(0.45, 7.2, 0.45),
-			cframe = at(x, 3.6, -9.2),
-			color = METAL,
+			size = Vector3.new(0.55, 7.4, 0.55),
+			cframe = at(x, 3.7, -11.2),
+			color = steel,
 			material = Enum.Material.DiamondPlate,
-			reflectance = 0.12,
+			reflectance = 0.18,
 		})
+		World.part(model, {
+			name = name .. "Base",
+			size = Vector3.new(1.3, 0.18, 1.3),
+			cframe = at(x, 0.1, -11.2),
+			color = steel,
+			material = Enum.Material.Metal,
+			reflectance = 0.25,
+		})
+		World.part(model, {
+			name = name .. "Stripe",
+			size = Vector3.new(0.58, 0.35, 0.58),
+			cframe = at(x, 1.4, -11.2),
+			color = Color3.fromRGB(214, 168, 42),
+			material = Enum.Material.Metal,
+			reflectance = 0.2,
+		})
+		return column
 	end
-	post("LiftPostL", -5.2)
-	post("LiftPostR", 5.2)
+	post("LiftPostL", -4.4)
+	post("LiftPostR", 4.4)
 	World.part(model, {
 		name = "LiftBeam",
-		size = Vector3.new(11.2, 0.35, 0.45),
-		cframe = at(0, 7.2, -9.2),
-		color = METAL,
+		size = Vector3.new(9.6, 0.4, 0.5),
+		cframe = at(0, 7.35, -11.2),
+		color = steel,
 		material = Enum.Material.DiamondPlate,
+		reflectance = 0.16,
 	})
 	World.part(model, {
 		name = "LiftRam",
-		size = Vector3.new(5.5, 0.35, 0.35),
-		cframe = at(0, 3.2, -9.2, 0, 0, 90),
-		color = Color3.fromRGB(70, 72, 76),
+		size = Vector3.new(5.2, 0.42, 0.42),
+		cframe = at(0, 3.1, -11.2, 0, 0, 90),
+		color = Color3.fromRGB(48, 50, 54),
 		material = Enum.Material.Metal,
-		reflectance = 0.2,
+		reflectance = 0.35,
 		shape = "cylinder",
 	})
 	World.part(model, {
-		name = "LiftCarriage",
-		size = Vector3.new(10.2, 0.22, 3.4),
-		cframe = at(0, 1.15, -9.2),
-		color = Color3.fromRGB(96, 98, 102),
-		material = Enum.Material.DiamondPlate,
-		reflectance = 0.08,
+		name = "LiftPiston",
+		size = Vector3.new(3.2, 0.22, 0.22),
+		cframe = at(0, 4.4, -11.2, 0, 0, 90),
+		color = chrome,
+		material = Enum.Material.Metal,
+		reflectance = 0.55,
+		shape = "cylinder",
 	})
+	for _, x in { -2.2, 2.2 } do
+		World.part(model, {
+			name = "LiftArm",
+			size = Vector3.new(0.35, 0.22, 3.6),
+			cframe = at(x, 1.35, -9.3),
+			color = steel,
+			material = Enum.Material.Metal,
+			reflectance = 0.28,
+		})
+		World.part(model, {
+			name = "LiftPad",
+			size = Vector3.new(0.7, 0.12, 0.7),
+			cframe = at(x, 1.15, -7.6),
+			color = Color3.fromRGB(196, 154, 36),
+			material = Enum.Material.Metal,
+			reflectance = 0.2,
+		})
+	end
+	local carriage = World.part(model, {
+		name = "LiftCarriage",
+		size = Vector3.new(8.4, 0.2, 2.4),
+		cframe = at(0, 1.55, -11.2),
+		color = Color3.fromRGB(90, 94, 100),
+		material = Enum.Material.DiamondPlate,
+		reflectance = 0.22,
+	})
+	carriage.Reflectance = 0.22
 
 	-- Workbench on the right wall.
 	World.part(model, {
@@ -270,7 +323,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local slot = World.part(model, {
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
-		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y, 2), Vector3.new(0, Config.CHASSIS_Y, 20)),
+		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y, 6), Vector3.new(0, Config.CHASSIS_Y, 24)),
 		transparency = 1,
 		collide = false,
 		shadow = false,
