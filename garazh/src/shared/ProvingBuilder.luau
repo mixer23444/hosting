@@ -14,23 +14,22 @@ function ProvingBuilder.points(): { Vector3 }
 	local function push(x: number, z: number)
 		table.insert(points, Vector3.new(x, 0, z))
 	end
+	-- Straight, then one sweeper, then a close back to the line.
 	push(0, 0)
-	push(0, 36)
-	push(0, 80)
-	push(0, 130)
-	push(0, 180)
-	push(0, 220)
-	push(24, 252)
-	push(62, 272)
-	push(104, 276)
-	push(146, 260)
-	push(176, 228)
-	push(190, 180)
-	push(190, 120)
-	push(190, 60)
-	push(168, 16)
-	push(120, -12)
-	push(64, -8)
+	push(0, 28)
+	push(0, 70)
+	push(0, 120)
+	push(0, 168)
+	push(6, 196)
+	push(24, 218)
+	push(52, 232)
+	push(84, 236)
+	push(116, 228)
+	push(140, 190)
+	push(148, 120)
+	push(140, 50)
+	push(90, 8)
+	push(30, -4)
 	push(0, 0)
 	return points
 end
@@ -51,7 +50,7 @@ function ProvingBuilder.build(origin: CFrame): Model
 	model.PrimaryPart = pivot
 
 	local points = ProvingBuilder.points()
-	TrackMesh.ground(model, Vector3.new(95, 0, 130), Vector3.new(280, 2, 360))
+	TrackMesh.ground(model, Vector3.new(74, 0, 116), Vector3.new(240, 2, 300))
 	TrackMesh.lay(model, points, WIDTH)
 
 	-- 1 start, 2 end of straight, 3 corner entry, 4 corner exit.
@@ -100,13 +99,23 @@ function ProvingBuilder.build(origin: CFrame): Model
 	gui.CanvasSize = Vector2.new(420, 140)
 	gui.Parent = board
 	local text = Instance.new("TextLabel")
-	text.Size = UDim2.fromScale(1, 1)
+	text.Size = UDim2.new(1, 0, 0.42, 0)
 	text.BackgroundTransparency = 1
 	text.Font = Enum.Font.GothamBold
 	text.TextColor3 = Color3.fromRGB(230, 230, 226)
 	text.TextScaled = true
-	text.Text = "ПОЛИГОН\nбез выплаты"
+	text.Text = "ПОЛИГОН  ·  без выплаты"
 	text.Parent = gui
+	local clock = Instance.new("TextLabel")
+	clock.Name = "LapClock"
+	clock.Size = UDim2.new(1, 0, 0.58, 0)
+	clock.Position = UDim2.new(0, 0, 0.42, 0)
+	clock.BackgroundTransparency = 1
+	clock.Font = Enum.Font.GothamBold
+	clock.TextColor3 = Color3.fromRGB(214, 162, 74)
+	clock.TextScaled = true
+	clock.Text = "КРУГ  ждёт отсечку"
+	clock.Parent = gui
 
 	model:PivotTo(origin)
 	return model

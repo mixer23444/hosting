@@ -8,6 +8,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Format = require(Shared.Format)
 local Physics = require(Shared.Physics)
 local CarBuilder = require(Shared.CarBuilder)
 local GarageBuilder = require(Shared.GarageBuilder)
@@ -333,10 +334,15 @@ local function stepProving(player: Player, session, dt: number)
 	telemetry.prev = pos
 	if os.clock() - telemetry.lastLive > 0.25 then
 		telemetry.lastLive = os.clock()
+		local lapTime = if telemetry.armed then os.clock() - telemetry.t0 else 0
+		local clock = padFor(session.index):FindFirstChild("LapClock", true)
+		if clock and clock:IsA("TextLabel") then
+			clock.Text = if telemetry.armed then ("КРУГ  " .. Format.seconds(lapTime)) else "КРУГ  ждёт отсечку"
+		end
 		Remotes.ProvingLive:FireClient(player, {
 			speed = speed,
 			armed = telemetry.armed,
-			lapTime = if telemetry.armed then os.clock() - telemetry.t0 else 0,
+			lapTime = lapTime,
 			next = telemetry.next,
 		})
 	end

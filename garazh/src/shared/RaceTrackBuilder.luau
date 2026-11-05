@@ -6,9 +6,10 @@ local World = require(script.Parent.World)
 
 local RaceTrackBuilder = {}
 
-local WIDTH = 36
-local LENGTH = 300
-local RADIUS = 56
+local WIDTH = 26
+local LENGTH = 180
+local RADIUS = 34
+local START_POINT = 6
 
 function RaceTrackBuilder.build(origin: CFrame): Model
 	local model = Instance.new("Model")
@@ -29,24 +30,25 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 	TrackMesh.ground(model, Vector3.new(RADIUS, 0, LENGTH * 0.5), Vector3.new(RADIUS * 2 + WIDTH + 220, 2, LENGTH + RADIUS * 2 + 180))
 	TrackMesh.lay(model, points, WIDTH)
 
-	-- Eight gates around the loop. Gate 1 is the start/finish on the first straight.
-	local gateAt = { 2, 5, 8, 12, 16, 20, 24, 28 }
+	-- Eight gates around the short loop. Gate 1 is the start/finish, mid-straight.
+	local gateAt = { START_POINT, 10, 14, 18, 22, 26, 30, 35 }
 	for index, pointIndex in gateAt do
 		if pointIndex < #points then
 			TrackMesh.gate(model, index, points, pointIndex, WIDTH)
 		end
 	end
 
-	-- Staggered grid behind the start line, still on the straight (straight begins at z = 0).
-	local lateral = { -12, -6, 0, 6, 12 }
-	local along = { 10, 18, 10, 18, 26 }
+	local lineZ = points[START_POINT].Z
+	-- Two-wide grid on the asphalt behind the line. The sedan is about 20 studs long.
+	local lateral = { -6, 6, -6, 6, 0 }
+	local along = { lineZ - 50, lineZ - 50, lineZ - 26, lineZ - 26, lineZ - 74 }
 	for index = 1, 5 do
 		local slot = World.part(model, {
 			name = "Grid" .. tostring(index),
 			size = Vector3.new(1, 1, 1),
 			cframe = CFrame.lookAt(
 				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.4, along[index]),
-				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.4, along[index] + 30)
+				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.4, along[index] + 40)
 			),
 			transparency = 1,
 			collide = false,
@@ -60,21 +62,21 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "GantryLeft",
 		size = Vector3.new(1.1, 10, 1.1),
-		cframe = CFrame.new(-WIDTH * 0.5 - 1, 5, 40),
+		cframe = CFrame.new(-WIDTH * 0.5 - 1, 5, lineZ),
 		color = Color3.fromRGB(120, 120, 118),
 		material = Enum.Material.Metal,
 	})
 	World.part(model, {
 		name = "GantryRight",
 		size = Vector3.new(1.1, 10, 1.1),
-		cframe = CFrame.new(WIDTH * 0.5 + 1, 5, 40),
+		cframe = CFrame.new(WIDTH * 0.5 + 1, 5, lineZ),
 		color = Color3.fromRGB(120, 120, 118),
 		material = Enum.Material.Metal,
 	})
 	World.part(model, {
 		name = "GantryBeam",
 		size = Vector3.new(WIDTH + 4, 0.6, 1.2),
-		cframe = CFrame.new(0, 10.2, 40),
+		cframe = CFrame.new(0, 10.2, lineZ),
 		color = Color3.fromRGB(96, 98, 102),
 		material = Enum.Material.DiamondPlate,
 	})
@@ -82,7 +84,7 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 		local lamp = World.part(model, {
 			name = "StartLight" .. tostring(index),
 			size = Vector3.new(1.1, 1.1, 1.1),
-			cframe = CFrame.new(x, 9.2, 40),
+			cframe = CFrame.new(x, 9.2, lineZ),
 			color = Color3.fromRGB(120, 30, 26),
 			material = Enum.Material.Glass,
 			transparency = 0.15,
@@ -101,7 +103,7 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 	local board = World.part(model, {
 		name = "Title",
 		size = Vector3.new(14, 3, 0.4),
-		cframe = CFrame.new(0, 6, -8),
+		cframe = CFrame.new(-WIDTH * 0.5 - 10, 4, lineZ - 30) * CFrame.Angles(0, math.rad(90), 0),
 		color = Color3.fromRGB(32, 34, 38),
 		material = Enum.Material.Metal,
 	})

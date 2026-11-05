@@ -252,6 +252,14 @@ bannerText.Size = UDim2.fromScale(1, 1)
 bannerText.TextWrapped = true
 bannerText.TextYAlignment = Enum.TextYAlignment.Top
 
+local lapLabel = UiKit.label(gui, "", 22, UiKit.ACCENT)
+lapLabel.AnchorPoint = Vector2.new(0.5, 1)
+lapLabel.Position = UDim2.new(0.5, 0, 1, -64)
+lapLabel.Size = UDim2.fromOffset(220, 28)
+lapLabel.TextXAlignment = Enum.TextXAlignment.Center
+lapLabel.Font = UiKit.FONT_BOLD
+lapLabel.Visible = false
+
 local speedLabel = UiKit.label(gui, "", 28)
 speedLabel.AnchorPoint = Vector2.new(0.5, 1)
 speedLabel.Position = UDim2.new(0.5, 0, 1, -24)
@@ -303,6 +311,9 @@ local function render()
 	if state.sessionOnly then
 		moneyLabel.Text ..= "  ·  только эта сессия"
 	end
+	if state.mode ~= "proving" then
+		lapLabel.Visible = false
+	end
 	modeLabel.Text = if state.mode == "proving"
 		then "Полигон. Выплаты нет. Белая черта — старт и финиш."
 		else "Бокс. Машина на полу, подъёмник сзади."
@@ -338,8 +349,11 @@ end)
 ProvingLive.OnClientEvent:Connect(function(live)
 	speedLabel.Visible = true
 	speedLabel.Text = Format.speed(live.speed)
+	lapLabel.Visible = live.armed == true
 	if live.armed then
-		modeLabel.Text = "Круг  " .. Format.seconds(live.lapTime)
+		local text = "Круг  " .. Format.seconds(live.lapTime)
+		modeLabel.Text = text
+		lapLabel.Text = text
 	end
 end)
 

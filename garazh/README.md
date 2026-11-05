@@ -40,8 +40,8 @@ DataStore `GarazhProfile_v1` вызывается только на опубли
 
 ## Арт
 
-Кузов — официальный седан Roblox (модель 6418239833): краска, стекло, фары и колёса из мешей. Пол гаража — бетон, стены — бетон, подъёмник — металл. Это не шоурум и не машина из кирпичей.
+Кузов — официальный седан Roblox (модель 6418239833): краска, стекло, фары и колёса из мешей. Пол гаража — бетон, стены — бетон, подъёмник — металл. Полигон — асфальт с разметкой, одна дуга и таймер круга. Гонка — короткий круг, 3 круга, стартовая решётка, та же машина. Это не шоурум и не машина из кирпичей.
 
 ## English
 
-Friends’ race. Open the `garazh` folder with Rojo: `rojo serve default.project.json` for the garage place, `rojo serve race.project.json` for the race place. Connect the Rojo plugin in Studio. The car uses the public Roblox sedan meshes (model 6418239833), with concrete, asphalt, and metal in the garage. Not a finished showroom. `TeleportService:ReserveServer` only works on a published race place in the same universe — put both place ids in `src/shared/Config.luau`. Studio Play does not call DataStore; cash and upgrades stay in memory for the session. The solo ghost lap is a stub. The garage, car, four upgrades, proving pad, and invited race are in code.
+Friends’ race. Open the `garazh` folder with Rojo: `rojo serve default.project.json` for the garage place, `rojo serve race.project.json` for the race place. Connect the Rojo plugin in Studio. The car uses the public Roblox sedan meshes (model 6418239833). The proving pad is textured asphalt with a painted lane, one corner, and a lap timer. The race place is a short circuit, 3 laps, and a start grid with the same car. Not a finished showroom. `TeleportService:ReserveServer` only works on a published race place in the same universe — put both place ids in `src/shared/Config.luau`. Studio Play does not call DataStore; cash and upgrades stay in memory for the session. The solo ghost lap is a stub. The garage, car, four upgrades, proving pad, and invited race are in code.

@@ -58,6 +58,7 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 			color = asphalt,
 			material = Enum.Material.Asphalt,
 		})
+		World.tile(road, "rbxassetid://7551987784", Enum.NormalId.Top, 10)
 		table.insert(parts, road)
 
 		World.part(parent, {
@@ -69,17 +70,27 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 			shadow = false,
 		})
 
-		if index % 2 == 0 then
+		local paint = Color3.fromRGB(232, 230, 220)
+		for side = -1, 1, 2 do
 			World.part(parent, {
-				name = "Dash",
-				size = Vector3.new(0.28, 0.04, math.max(1.2, length * 0.42)),
-				cframe = cf * CFrame.new(0, 0.04, 0),
-				color = Color3.fromRGB(214, 214, 206),
+				name = "Lane",
+				size = Vector3.new(0.32, 0.05, length + 0.35),
+				cframe = cf * CFrame.new(side * (width * 0.5 - 1.8), 0.06, 0),
+				color = paint,
 				material = Enum.Material.SmoothPlastic,
 				collide = false,
 				shadow = false,
 			})
 		end
+		World.part(parent, {
+			name = "Dash",
+			size = Vector3.new(0.28, 0.04, math.max(1.4, length * 0.38)),
+			cframe = cf * CFrame.new(0, 0.07, 0),
+			color = paint,
+			material = Enum.Material.SmoothPlastic,
+			collide = false,
+			shadow = false,
+		})
 
 		local right = cf.RightVector
 		for side = -1, 1, 2 do
