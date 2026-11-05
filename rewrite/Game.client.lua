@@ -1,4 +1,4 @@
--- Новый плейс. LocalScript в StarterPlayerScripts.
+-- Гараж. LocalScript в StarterPlayer > StarterPlayerScripts. Замени старый LocalScript целиком.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
-local yaw, pitch = 0, 0.25
+local yaw, pitch = 0, 0.28
 local lapStart = nil
 
 local gui = Instance.new("ScreenGui")
@@ -15,80 +15,91 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local panel = Instance.new("Frame")
-panel.Size = UDim2.fromOffset(230, 250)
-panel.Position = UDim2.fromOffset(12, 12)
-panel.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
-panel.BackgroundTransparency = 0.15
+panel.Size = UDim2.fromOffset(240, 292)
+panel.Position = UDim2.fromOffset(14, 14)
+panel.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+panel.BackgroundTransparency = 0.08
 panel.Parent = gui
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = panel
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -16, 0, 26)
+title.Position = UDim2.fromOffset(10, 8)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextColor3 = Color3.fromRGB(245, 245, 245)
+title.Text = "Гараж"
+title.Parent = panel
 
 local money = Instance.new("TextLabel")
-money.Size = UDim2.new(1, -16, 0, 28)
-money.Position = UDim2.fromOffset(8, 8)
+money.Size = UDim2.new(1, -16, 0, 20)
+money.Position = UDim2.fromOffset(10, 32)
 money.BackgroundTransparency = 1
-money.TextColor3 = Color3.new(1, 1, 1)
-money.Font = Enum.Font.GothamMedium
-money.TextSize = 16
+money.Font = Enum.Font.Gotham
+money.TextSize = 14
 money.TextXAlignment = Enum.TextXAlignment.Left
+money.TextColor3 = Color3.fromRGB(220, 190, 110)
 money.Text = "500 кр."
 money.Parent = panel
 
-local rows = {
-	{ "speed", "Скорость" },
-	{ "accel", "Разгон" },
-	{ "grip", "Держак" },
-	{ "weight", "Масса" },
-}
+local names = { speed = "Скорость", accel = "Разгон", grip = "Держак", weight = "Масса" }
+local order = { "speed", "accel", "grip", "weight" }
 local labels = {}
-for index, row in rows do
+for index, key in order do
+	local y = 58 + (index - 1) * 40
 	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromOffset(110, 28)
-	label.Position = UDim2.fromOffset(8, 40 + (index - 1) * 36)
+	label.Size = UDim2.fromOffset(120, 22)
+	label.Position = UDim2.fromOffset(10, y)
 	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.new(1, 1, 1)
 	label.Font = Enum.Font.Gotham
 	label.TextSize = 14
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Text = row[2] .. " 1"
+	label.TextColor3 = Color3.fromRGB(235, 235, 235)
+	label.Text = names[key] .. "  1"
 	label.Parent = panel
-	labels[row[1]] = label
+	labels[key] = label
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.fromOffset(90, 26)
-	button.Position = UDim2.fromOffset(128, 40 + (index - 1) * 36)
-	button.BackgroundColor3 = Color3.fromRGB(196, 140, 40)
+	button.Size = UDim2.fromOffset(88, 26)
+	button.Position = UDim2.fromOffset(140, y - 2)
+	button.BackgroundColor3 = Color3.fromRGB(186, 128, 36)
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.Font = Enum.Font.GothamMedium
 	button.TextSize = 14
 	button.Text = "Купить"
 	button.Parent = panel
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, 6)
+	buttonCorner.Parent = button
 	button.MouseButton1Click:Connect(function()
-		ReplicatedStorage:WaitForChild("BuyUpgrade"):FireServer(row[1])
+		ReplicatedStorage:WaitForChild("BuyUpgrade"):FireServer(key)
 	end)
 end
 
-local leave = Instance.new("TextButton")
-leave.Size = UDim2.fromOffset(206, 30)
-leave.Position = UDim2.fromOffset(12, 196)
-leave.BackgroundColor3 = Color3.fromRGB(40, 40, 46)
-leave.TextColor3 = Color3.new(1, 1, 1)
-leave.Font = Enum.Font.GothamMedium
-leave.TextSize = 15
-leave.Text = "На полигон"
-leave.Parent = panel
-leave.MouseButton1Click:Connect(function()
+local function action(text, y, color, callback)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.fromOffset(216, 30)
+	button.Position = UDim2.fromOffset(12, y)
+	button.BackgroundColor3 = color
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Font = Enum.Font.GothamMedium
+	button.TextSize = 15
+	button.Text = text
+	button.Parent = panel
+	local buttonCorner = Instance.new("UICorner")
+	buttonCorner.CornerRadius = UDim.new(0, 6)
+	buttonCorner.Parent = button
+	button.MouseButton1Click:Connect(callback)
+end
+
+action("На полигон", 214, Color3.fromRGB(46, 48, 56), function()
 	ReplicatedStorage:WaitForChild("GoPad"):FireServer()
 	lapStart = os.clock()
 end)
-
-local finish = Instance.new("TextButton")
-finish.Size = UDim2.fromOffset(206, 30)
-finish.Position = UDim2.fromOffset(12, 274)
-finish.BackgroundColor3 = Color3.fromRGB(40, 70, 48)
-finish.TextColor3 = Color3.new(1, 1, 1)
-finish.Font = Enum.Font.GothamMedium
-finish.TextSize = 15
-finish.Text = "Финиш круга"
-finish.Parent = gui
-finish.MouseButton1Click:Connect(function()
+action("Финиш круга", 250, Color3.fromRGB(42, 78, 52), function()
 	if not lapStart then
 		return
 	end
@@ -99,7 +110,7 @@ end)
 ReplicatedStorage:WaitForChild("GarageUpdate").OnClientEvent:Connect(function(amount, data)
 	money.Text = tostring(amount) .. " кр."
 	for key, label in labels do
-		label.Text = label.Text:gsub("%d+$", tostring(data[key]))
+		label.Text = names[key] .. "  " .. tostring(data[key])
 	end
 end)
 
@@ -123,6 +134,6 @@ RunService.RenderStepped:Connect(function()
 		return
 	end
 	camera.CameraType = Enum.CameraType.Scriptable
-	local focus = root.Position + Vector3.new(0, 1.5, 0)
-	camera.CFrame = CFrame.new(focus) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(pitch, 0, 0) * CFrame.new(0, 1.4, 14)
+	local focus = root.Position + Vector3.new(0, 1.6, 0)
+	camera.CFrame = CFrame.new(focus) * CFrame.Angles(0, yaw, 0) * CFrame.Angles(pitch, 0, 0) * CFrame.new(0, 1.5, 14)
 end)
