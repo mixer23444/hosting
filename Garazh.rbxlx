@@ -1,0 +1,447 @@
+<roblox version="4">
+  <Item class="Workspace" referent="0">
+    <Properties>
+      <string name="Name">Workspace</string>
+    </Properties>
+  </Item>
+  <Item class="Lighting" referent="1">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <float name="ClockTime">14</float>
+      <float name="GeographicLatitude">20</float>
+      <token name="Technology">4</token>
+    </Properties>
+  </Item>
+  <Item class="ServerScriptService" referent="2">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="3">
+      <Properties>
+        <string name="Name">Garazh</string>
+        <ProtectedString name="Source"><![CDATA[-- Гараж. Один скрипт, без Rojo. Открой этот файл в Studio и нажми Play.
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+Lighting.ClockTime = 14
+Lighting.Brightness = 2
+Lighting.Ambient = Color3.fromRGB(120, 130, 140)
+Lighting.OutdoorAmbient = Color3.fromRGB(140, 150, 160)
+Lighting.EnvironmentDiffuseScale = 0.4
+Lighting.EnvironmentSpecularScale = 0.3
+
+local sky = Instance.new("Sky")
+sky.SkyboxBk = "rbxassetid://6444884337"
+sky.SkyboxDn = "rbxassetid://6444884785"
+sky.SkyboxFt = "rbxassetid://6444884337"
+sky.SkyboxLf = "rbxassetid://6444884337"
+sky.SkyboxRt = "rbxassetid://6444884337"
+sky.SkyboxUp = "rbxassetid://6412503613"
+sky.SunAngularSize = 12
+sky.Parent = Lighting
+
+local atmo = Instance.new("Atmosphere")
+atmo.Density = 0.3
+atmo.Offset = 0.2
+atmo.Color = Color3.fromRGB(180, 200, 220)
+atmo.Decay = Color3.fromRGB(160, 180, 200)
+atmo.Glare = 0
+atmo.Haze = 1
+atmo.Parent = Lighting
+
+local function part(props)
+	local p = Instance.new(props.class or "Part")
+	p.Anchored = props.anchored ~= false
+	p.CanCollide = props.collide ~= false
+	p.Size = props.size or Vector3.new(4, 1, 4)
+	p.CFrame = props.cf or CFrame.new()
+	p.Color = props.color or Color3.fromRGB(160, 160, 160)
+	p.Material = props.material or Enum.Material.Concrete
+	p.Name = props.name or "Part"
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	if props.transparency then
+		p.Transparency = props.transparency
+	end
+	if props.shape then
+		p.Shape = props.shape
+	end
+	p.Parent = props.parent or workspace
+	return p
+end
+
+local base = workspace:FindFirstChild("Baseplate")
+if base then
+	base:Destroy()
+end
+
+part({
+	name = "Ground",
+	size = Vector3.new(600, 2, 600),
+	cf = CFrame.new(0, -1, 0),
+	color = Color3.fromRGB(90, 95, 90),
+	material = Enum.Material.Grass,
+})
+
+part({
+	name = "Asphalt",
+	size = Vector3.new(36, 0.4, 220),
+	cf = CFrame.new(0, 0.2, 40),
+	color = Color3.fromRGB(50, 52, 54),
+	material = Enum.Material.Asphalt,
+})
+
+for i = -8, 8 do
+	part({
+		name = "Lane",
+		size = Vector3.new(0.4, 0.05, 6),
+		cf = CFrame.new(0, 0.45, i * 12),
+		color = Color3.fromRGB(230, 220, 160),
+		material = Enum.Material.SmoothPlastic,
+	})
+end
+
+for side = -1, 1, 2 do
+	part({
+		name = "Sidewalk",
+		size = Vector3.new(10, 0.5, 220),
+		cf = CFrame.new(side * 23, 0.35, 40),
+		color = Color3.fromRGB(170, 170, 168),
+		material = Enum.Material.Concrete,
+	})
+end
+
+local function building(x, z, w, d, h, mat, color)
+	part({
+		name = "House",
+		size = Vector3.new(w, h, d),
+		cf = CFrame.new(x, h / 2, z),
+		color = color,
+		material = mat,
+	})
+	part({
+		name = "Window",
+		size = Vector3.new(0.4, 3, 4),
+		cf = CFrame.new(x - math.sign(x) * (w / 2), 4, z),
+		color = Color3.fromRGB(180, 210, 220),
+		material = Enum.Material.Glass,
+		transparency = 0.3,
+	})
+	part({
+		name = "Roof",
+		size = Vector3.new(w + 1, 1, d + 1),
+		cf = CFrame.new(x, h + 0.5, z),
+		color = Color3.fromRGB(70, 75, 80),
+		material = Enum.Material.Metal,
+	})
+end
+
+local houses = {
+	{ -40, -20, 18, 16, 12, Enum.Material.Brick, Color3.fromRGB(150, 80, 70) },
+	{ -42, 20, 16, 18, 16, Enum.Material.Concrete, Color3.fromRGB(190, 185, 175) },
+	{ -38, 60, 20, 14, 10, Enum.Material.Brick, Color3.fromRGB(120, 90, 70) },
+	{ 40, -10, 16, 20, 14, Enum.Material.Concrete, Color3.fromRGB(200, 195, 185) },
+	{ 42, 30, 18, 16, 18, Enum.Material.Brick, Color3.fromRGB(140, 100, 80) },
+	{ 38, 70, 16, 14, 12, Enum.Material.Concrete, Color3.fromRGB(170, 175, 180) },
+}
+for _, h in houses do
+	building(h[1], h[2], h[3], h[4], h[5], h[6], h[7])
+end
+
+for _, z in { -30, 10, 50, 90 } do
+	local pole = part({
+		name = "Lamp",
+		size = Vector3.new(0.4, 8, 0.4),
+		cf = CFrame.new(-16, 4, z),
+		color = Color3.fromRGB(40, 40, 42),
+		material = Enum.Material.Metal,
+	})
+	local lamp = part({
+		name = "LampHead",
+		size = Vector3.new(1.2, 0.4, 0.6),
+		cf = pole.CFrame * CFrame.new(0, 4, 0),
+		color = Color3.fromRGB(255, 236, 180),
+		material = Enum.Material.Neon,
+	})
+	lamp.CanCollide = false
+end
+
+local garage = part({
+	name = "GarageFloor",
+	size = Vector3.new(28, 0.4, 22),
+	cf = CFrame.new(-55, 0.2, 40),
+	color = Color3.fromRGB(90, 92, 96),
+	material = Enum.Material.DiamondPlate,
+})
+part({
+	name = "GarageWall",
+	size = Vector3.new(1, 10, 22),
+	cf = CFrame.new(-69, 5, 40),
+	material = Enum.Material.Concrete,
+	color = Color3.fromRGB(160, 160, 158),
+})
+part({
+	name = "GarageRoof",
+	size = Vector3.new(28, 1, 22),
+	cf = CFrame.new(-55, 10, 40),
+	material = Enum.Material.Metal,
+	color = Color3.fromRGB(80, 82, 86),
+})
+
+local function makeCar(pos)
+	local model = Instance.new("Model")
+	model.Name = "Car"
+	model.Parent = workspace
+
+	local chassis = part({
+		name = "Chassis",
+		size = Vector3.new(6, 1, 12),
+		cf = CFrame.new(pos + Vector3.new(0, 2, 0)),
+		color = Color3.fromRGB(25, 25, 28),
+		material = Enum.Material.SmoothPlastic,
+		anchored = false,
+		parent = model,
+	})
+	chassis.CustomPhysicalProperties = PhysicalProperties.new(2, 0.4, 0.2, 1, 1)
+
+	local body = part({
+		name = "Body",
+		size = Vector3.new(6.2, 1.2, 11),
+		cf = chassis.CFrame * CFrame.new(0, 1, 0),
+		color = Color3.fromRGB(30, 30, 34),
+		material = Enum.Material.SmoothPlastic,
+		anchored = false,
+		parent = model,
+	})
+	local cabin = part({
+		name = "Cabin",
+		size = Vector3.new(5.4, 1.4, 4.5),
+		cf = chassis.CFrame * CFrame.new(0, 2.1, 0.4),
+		color = Color3.fromRGB(20, 20, 22),
+		material = Enum.Material.SmoothPlastic,
+		anchored = false,
+		parent = model,
+	})
+	local glass = part({
+		name = "Glass",
+		size = Vector3.new(5.2, 1.1, 4.2),
+		cf = cabin.CFrame * CFrame.new(0, 0.2, 0),
+		color = Color3.fromRGB(170, 200, 210),
+		material = Enum.Material.Glass,
+		transparency = 0.45,
+		anchored = false,
+		collide = false,
+		parent = model,
+	})
+
+	local seat = Instance.new("VehicleSeat")
+	seat.Name = "DriveSeat"
+	seat.Size = Vector3.new(2, 0.6, 2)
+	seat.CFrame = chassis.CFrame * CFrame.new(-0.7, 1.3, 0.2)
+	seat.MaxSpeed = 55
+	seat.Torque = 8
+	seat.TurnSpeed = 2
+	seat.HeadsUpDisplay = false
+	seat.Anchored = false
+	seat.Parent = model
+
+	local function weld(a, b)
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = a
+		w.Part1 = b
+		w.Parent = a
+	end
+	weld(chassis, body)
+	weld(chassis, cabin)
+	weld(chassis, glass)
+	weld(chassis, seat)
+
+	for _, x in { -2.4, 2.4 } do
+		for _, z in { -3.6, 3.6 } do
+			local wheel = part({
+				name = "Wheel",
+				size = Vector3.new(1.2, 2.4, 2.4),
+				shape = Enum.PartType.Cylinder,
+				cf = chassis.CFrame * CFrame.new(x, -0.7, z) * CFrame.Angles(0, 0, math.rad(90)),
+				color = Color3.fromRGB(20, 20, 20),
+				material = Enum.Material.Rubber,
+				anchored = false,
+				parent = model,
+			})
+			weld(chassis, wheel)
+		end
+	end
+
+	model.PrimaryPart = chassis
+
+	local att = Instance.new("Attachment")
+	att.Parent = chassis
+	local vel = Instance.new("LinearVelocity")
+	vel.Attachment0 = att
+	vel.MaxForce = 80000
+	vel.VectorVelocity = Vector3.zero
+	vel.RelativeTo = Enum.ActuatorRelativeTo.World
+	vel.Parent = chassis
+	local spin = Instance.new("AngularVelocity")
+	spin.Attachment0 = att
+	spin.MaxTorque = 40000
+	spin.AngularVelocity = Vector3.zero
+	spin.RelativeTo = Enum.ActuatorRelativeTo.World
+	spin.Parent = chassis
+
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Сесть"
+	prompt.ObjectText = "Машина"
+	prompt.HoldDuration = 0
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = seat
+
+	prompt.Triggered:Connect(function(player)
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			seat:Sit(humanoid)
+			humanoid.Sit = true
+		end
+	end)
+
+	RunService.Heartbeat:Connect(function()
+		if not chassis.Parent then
+			return
+		end
+		local throttle = seat.ThrottleFloat
+		local steer = seat.SteerFloat
+		local look = chassis.CFrame.LookVector
+		vel.VectorVelocity = look * throttle * 45
+		spin.AngularVelocity = Vector3.new(0, -steer * 1.6, 0)
+		if seat.Occupant == nil and math.abs(throttle) < 0.05 then
+			vel.VectorVelocity = Vector3.zero
+			spin.AngularVelocity = Vector3.zero
+		end
+	end)
+
+	return model, chassis
+end
+
+local car, chassis = makeCar(Vector3.new(0, 1, 8))
+
+local pad = part({
+	name = "ProvingAsphalt",
+	size = Vector3.new(80, 0.4, 160),
+	cf = CFrame.new(0, 0.2, 420),
+	color = Color3.fromRGB(48, 50, 52),
+	material = Enum.Material.Asphalt,
+})
+part({
+	name = "ProvingLine",
+	size = Vector3.new(0.5, 0.05, 120),
+	cf = CFrame.new(0, 0.5, 420),
+	color = Color3.fromRGB(230, 220, 160),
+	material = Enum.Material.SmoothPlastic,
+})
+
+local function sendToProving(player)
+	if chassis and chassis.Parent then
+		chassis.AssemblyLinearVelocity = Vector3.zero
+		chassis.AssemblyAngularVelocity = Vector3.zero
+		car:PivotTo(CFrame.new(0, 3, 360))
+	end
+	local character = player.Character
+	if character and character:FindFirstChild("HumanoidRootPart") then
+		local seat = car:FindFirstChild("DriveSeat")
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if seat and humanoid then
+			seat:Sit(humanoid)
+		end
+	end
+end
+
+local remote = Instance.new("RemoteEvent")
+remote.Name = "GoProving"
+remote.Parent = game:GetService("ReplicatedStorage")
+remote.OnServerEvent:Connect(function(player)
+	sendToProving(player)
+end)
+
+-- Кнопка «Выехать» создаётся локальным скриптом, чтобы клик доходил до сервера.
+]]></ProtectedString>
+        <bool name="Disabled">false</bool>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="4">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="5">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="6">
+        <Properties>
+          <string name="Name">DriveCamera</string>
+          <ProtectedString name="Source"><![CDATA[local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local yaw = 0
+local pitch = 0.25
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "GarazhGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.fromOffset(180, 40)
+button.Position = UDim2.new(0, 16, 1, -56)
+button.BackgroundColor3 = Color3.fromRGB(40, 40, 44)
+button.TextColor3 = Color3.fromRGB(240, 240, 240)
+button.Font = Enum.Font.GothamMedium
+button.TextSize = 16
+button.Text = "Выехать"
+button.Parent = gui
+
+local remote = ReplicatedStorage:WaitForChild("GoProving")
+button.MouseButton1Click:Connect(function()
+	remote:FireServer()
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.MouseMovement then
+		return
+	end
+	if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+		return
+	end
+	yaw -= input.Delta.X * 0.005
+	pitch = math.clamp(pitch + input.Delta.Y * 0.005, -0.6, 1.1)
+end)
+
+RunService.RenderStepped:Connect(function()
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not humanoid or not root then
+		return
+	end
+	if humanoid.SeatPart then
+		camera.CameraType = Enum.CameraType.Scriptable
+		local focus = root.Position + Vector3.new(0, 2, 0)
+		local rotation = CFrame.Angles(0, yaw, 0) * CFrame.Angles(pitch, 0, 0)
+		camera.CFrame = CFrame.new(focus) * rotation * CFrame.new(0, 2, 16)
+	else
+		camera.CameraType = Enum.CameraType.Custom
+	end
+end)
+]]></ProtectedString>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+</roblox>
