@@ -39,6 +39,20 @@
         "Ambient": [0.12, 0.12, 0.13],
         "ShadowSoftness": 0.2
       },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "SkyboxBk": "rbxassetid://401664839",
+          "SkyboxDn": "rbxassetid://401664862",
+          "SkyboxFt": "rbxassetid://401664960",
+          "SkyboxLf": "rbxassetid://401664881",
+          "SkyboxRt": "rbxassetid://401664901",
+          "SkyboxUp": "rbxassetid://401664936",
+          "SunAngularSize": 16,
+          "StarCount": 0,
+          "CelestialBodiesShown": true
+        }
+      },
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {

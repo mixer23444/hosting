@@ -84,6 +84,22 @@ function GarageBuilder.build(origin: CFrame): Model
 	})
 	World.tile(wallBack, "rbxassetid://7547630026", Enum.NormalId.Back, 8)
 	World.part(model, {
+		name = "WallCapL",
+		size = Vector3.new(0.9, 0.28, 40),
+		cframe = at(-15.35, 10.05, 0),
+		color = Color3.fromRGB(118, 122, 128),
+		material = Enum.Material.DiamondPlate,
+		reflectance = 0.22,
+	})
+	World.part(model, {
+		name = "WallCapR",
+		size = Vector3.new(0.9, 0.28, 40),
+		cframe = at(15.35, 10.05, 0),
+		color = Color3.fromRGB(118, 122, 128),
+		material = Enum.Material.DiamondPlate,
+		reflectance = 0.22,
+	})
+	World.part(model, {
 		name = "WallBackHigh",
 		size = Vector3.new(30, 2.2, 0.7),
 		cframe = at(0, 8.9, -20.35),

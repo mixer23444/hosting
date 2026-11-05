@@ -84,32 +84,56 @@ function World.dress()
 	end
 	local sky = Instance.new("Sky")
 	sky.Name = "GarazhSky"
-	sky.SkyboxBk = "rbxassetid://12064107"
-	sky.SkyboxDn = "rbxassetid://12064152"
-	sky.SkyboxFt = "rbxassetid://12064121"
-	sky.SkyboxLf = "rbxassetid://12063984"
-	sky.SkyboxRt = "rbxassetid://12064115"
-	sky.SkyboxUp = "rbxassetid://12064131"
-	sky.SunAngularSize = 18
+	sky.SkyboxBk = "rbxassetid://401664839"
+	sky.SkyboxDn = "rbxassetid://401664862"
+	sky.SkyboxFt = "rbxassetid://401664960"
+	sky.SkyboxLf = "rbxassetid://401664881"
+	sky.SkyboxRt = "rbxassetid://401664901"
+	sky.SkyboxUp = "rbxassetid://401664936"
+	sky.SunAngularSize = 16
 	sky.StarCount = 0
+	sky.CelestialBodiesShown = true
 	sky.Parent = Lighting
-	Lighting.ClockTime = 14.6
-	Lighting.Brightness = 2.3
-	Lighting.FogColor = Color3.fromRGB(176, 198, 220)
-	Lighting.FogStart = 400
-	Lighting.FogEnd = 2800
+
+	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+	if not atmosphere then
+		atmosphere = Instance.new("Atmosphere")
+		atmosphere.Parent = Lighting
+	end
+	atmosphere.Density = 0.22
+	atmosphere.Offset = 0.2
+	atmosphere.Color = Color3.fromRGB(168, 190, 210)
+	atmosphere.Decay = Color3.fromRGB(120, 138, 156)
+	atmosphere.Glare = 0.35
+	atmosphere.Haze = 0.35
+
+	Lighting.ClockTime = 15.1
+	Lighting.Brightness = 2.4
+	Lighting.OutdoorAmbient = Color3.fromRGB(150, 156, 162)
+	Lighting.Ambient = Color3.fromRGB(48, 50, 54)
+	Lighting.FogColor = Color3.fromRGB(168, 186, 204)
+	Lighting.FogStart = 1400
+	Lighting.FogEnd = 6000
 end
 
 function World.pad(center: Vector3, span: number)
 	local thickness = 8
+	local concrete = World.part(Workspace, {
+		name = "ConcretePad",
+		size = Vector3.new(span + 80, thickness, span + 80),
+		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.2, center.Z),
+		color = Color3.fromRGB(132, 130, 124),
+		material = Enum.Material.Concrete,
+	})
+	World.tile(concrete, "rbxassetid://7547337977", Enum.NormalId.Top, 16)
 	local pad = World.part(Workspace, {
 		name = "AsphaltPad",
 		size = Vector3.new(span, thickness, span),
-		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.04, center.Z),
-		color = Color3.fromRGB(52, 52, 54),
+		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.02, center.Z),
+		color = Color3.fromRGB(48, 48, 50),
 		material = Enum.Material.Asphalt,
 	})
-	World.tile(pad, "rbxassetid://7551987784", Enum.NormalId.Top, 18)
+	World.tile(pad, "rbxassetid://7551987784", Enum.NormalId.Top, 22)
 	return pad
 end
 
