@@ -11,6 +11,7 @@ local VehicleDriver = require(script.Parent.VehicleDriver)
 local SedanMesh = require(script.Parent.SedanMesh)
 
 local SEDAN_MODEL = 6418239833
+local USER_CAR = 14215126016
 
 local CarBuilder = {}
 
@@ -268,6 +269,152 @@ local function attachLoaded(model: Model, chassis: BasePart, source: Instance): 
 	return count > 8
 end
 
+local function cornerMinY(part: BasePart): number
+	local half = part.Size * 0.5
+	local lowest = math.huge
+	for _, sx in { -1, 1 } do
+		for _, sy in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				local world = part.CFrame * Vector3.new(half.X * sx, half.Y * sy, half.Z * sz)
+				if world.Y < lowest then
+					lowest = world.Y
+				end
+			end
+		end
+	end
+	return lowest
+end
+
+local function isWheelPart(part: BasePart): boolean
+	local name = string.lower(part.Name)
+	return string.find(name, "wheel", 1, true) ~= nil
+		or string.find(name, "tire", 1, true) ~= nil
+		or string.find(name, "tyre", 1, true) ~= nil
+		or string.find(name, "rim", 1, true) ~= nil
+end
+
+local function findNamedCar(root: Instance): Instance?
+	if string.lower(root.Name) == "car" then
+		return root
+	end
+	for _, descendant in root:GetDescendants() do
+		if string.lower(descendant.Name) == "car" then
+			return descendant
+		end
+	end
+	return nil
+end
+
+-- Player model 14215126016, instance "car". Scaled onto the chassis, nose toward -Z.
+local function attachUserCar(model: Model, chassis: BasePart): boolean
+	local ok, container = pcall(function()
+		return InsertService:LoadAsset(USER_CAR)
+	end)
+	if not ok or typeof(container) ~= "Instance" then
+		return false
+	end
+	local source = findNamedCar(container)
+	if not source then
+		container:Destroy()
+		return false
+	end
+	local clones = {}
+	local function take(part: BasePart)
+		local clone = part:Clone()
+		for _, child in clone:GetDescendants() do
+			if child:IsA("LuaSourceContainer") or child:IsA("Constraint") or child:IsA("Weld") or child:IsA("Attachment") then
+				child:Destroy()
+			end
+		end
+		table.insert(clones, clone)
+	end
+	if source:IsA("BasePart") then
+		take(source)
+	end
+	for _, descendant in source:GetDescendants() do
+		if descendant:IsA("BasePart") then
+			take(descendant)
+		end
+	end
+	container:Destroy()
+	if #clones < 1 then
+		return false
+	end
+
+	local minV = Vector3.new(math.huge, math.huge, math.huge)
+	local maxV = Vector3.new(-math.huge, -math.huge, -math.huge)
+	for _, part in clones do
+		local half = part.Size * 0.5
+		for _, sx in { -1, 1 } do
+			for _, sy in { -1, 1 } do
+				for _, sz in { -1, 1 } do
+					local world = part.CFrame * Vector3.new(half.X * sx, half.Y * sy, half.Z * sz)
+					minV = Vector3.new(math.min(minV.X, world.X), math.min(minV.Y, world.Y), math.min(minV.Z, world.Z))
+					maxV = Vector3.new(math.max(maxV.X, world.X), math.max(maxV.Y, world.Y), math.max(maxV.Z, world.Z))
+				end
+			end
+		end
+	end
+	local size = maxV - minV
+	local center = (minV + maxV) * 0.5
+	if size.X < 0.05 or size.Y < 0.05 or size.Z < 0.05 then
+		return false
+	end
+	local yaw = if size.X > size.Z then math.rad(90) else 0
+	local length = math.max(size.X, size.Z)
+	local scale = math.clamp(20 / length, 0.05, 8)
+
+	for _, part in clones do
+		local localCF = CFrame.new(-center) * part.CFrame
+		local pos = localCF.Position * scale
+		local rotation = localCF - localCF.Position
+		part.Size = part.Size * scale
+		local mesh = part:FindFirstChildOfClass("SpecialMesh")
+		if mesh then
+			mesh.Scale = mesh.Scale * scale
+		end
+		part.CFrame = CFrame.Angles(0, yaw, 0) * CFrame.new(pos) * rotation
+	end
+
+	local noseZ = 0
+	local noseN = 0
+	for _, part in clones do
+		local name = string.lower(part.Name)
+		if string.find(name, "front", 1, true) or string.find(name, "hood", 1, true) or string.find(name, "head", 1, true) then
+			noseZ += part.Position.Z
+			noseN += 1
+		end
+	end
+	if noseN > 0 and noseZ / noseN > 0 then
+		for _, part in clones do
+			part.CFrame = CFrame.Angles(0, math.pi, 0) * part.CFrame
+		end
+	end
+
+	local lowest = math.huge
+	for _, part in clones do
+		lowest = math.min(lowest, cornerMinY(part))
+	end
+	local drop = -Config.CHASSIS_Y - lowest
+	for _, part in clones do
+		part.CFrame = CFrame.new(0, drop, 0) * part.CFrame
+		part.Anchored = true
+		part.CanCollide = false
+		part.Massless = true
+		part.CastShadow = true
+		if part.Material == Enum.Material.Neon then
+			part.Material = Enum.Material.Glass
+		end
+		part.Parent = model
+		local host = chassis
+		if isWheelPart(part) then
+			host = hostFor(model, "tire", part.Position) or chassis
+		end
+		World.weld(host, part)
+	end
+	return true
+end
+
 local function tryCatalogMesh(model: Model, chassis: BasePart): boolean
 	local ok, container = pcall(function()
 		return InsertService:LoadAsset(SEDAN_MODEL)
@@ -481,9 +628,11 @@ function CarBuilder.create(build): Model
 	addWheel(model, chassis, constraints, "RL", -3.732, 6.181, false)
 	addWheel(model, chassis, constraints, "RR", 3.733, 6.181, false)
 
-	-- Public Roblox sedan (model 6418239833). Mesh ids are the fallback when LoadAsset cannot run.
-	if not tryCatalogMesh(model, chassis) then
-		attachFallback(model, chassis)
+	-- User car 14215126016 ("car"). The public sedan is only the fallback.
+	if not attachUserCar(model, chassis) then
+		if not tryCatalogMesh(model, chassis) then
+			attachFallback(model, chassis)
+		end
 	end
 
 	local seat = Instance.new("VehicleSeat")

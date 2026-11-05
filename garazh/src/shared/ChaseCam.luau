@@ -78,7 +78,7 @@ function ChaseCam.bind()
 		if orbiting or UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
 			local delta = UserInputService:GetMouseDelta()
 			yaw -= delta.X * 0.005
-			pitch = math.clamp(pitch + delta.Y * 0.004, -0.2, 1.05)
+			pitch = math.clamp(pitch - delta.Y * 0.004, -0.2, 1.05)
 		end
 
 		local ignore = { model }

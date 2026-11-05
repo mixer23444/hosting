@@ -40,15 +40,15 @@ function RaceTrackBuilder.build(origin: CFrame): Model
 
 	local lineZ = points[START_POINT].Z
 	-- Two-wide grid on the asphalt behind the line. The sedan is about 20 studs long.
-	local lateral = { -6, 6, -6, 6, 0 }
+	local lateral = { -4, 4, -4, 4, 0 }
 	local along = { lineZ - 50, lineZ - 50, lineZ - 26, lineZ - 26, lineZ - 74 }
 	for index = 1, 5 do
 		local slot = World.part(model, {
 			name = "Grid" .. tostring(index),
 			size = Vector3.new(1, 1, 1),
 			cframe = CFrame.lookAt(
-				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.7, along[index]),
-				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.7, along[index] + 40)
+				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.05, along[index]),
+				Vector3.new(lateral[index], Config.CHASSIS_Y + 0.05, along[index] + 40)
 			),
 			transparency = 1,
 			collide = false,

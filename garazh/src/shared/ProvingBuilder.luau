@@ -63,8 +63,8 @@ function ProvingBuilder.build(origin: CFrame): Model
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
 		cframe = CFrame.lookAt(
-			Vector3.new(0, Config.CHASSIS_Y + 0.7, 8),
-			Vector3.new(0, Config.CHASSIS_Y + 0.7, 40)
+			Vector3.new(0, Config.CHASSIS_Y + 0.05, 56),
+			Vector3.new(0, Config.CHASSIS_Y + 0.05, 90)
 		),
 		transparency = 1,
 		collide = false,

@@ -73,22 +73,31 @@ function World.tile(part: BasePart, assetId: string, face: Enum.NormalId, studs:
 end
 
 function World.dress()
-	local baseplate = Workspace:FindFirstChild("Baseplate")
-	if baseplate then
-		baseplate:Destroy()
+	for _, child in Workspace:GetChildren() do
+		if child.Name == "Baseplate" or child.Name == "BasePlate" then
+			child:Destroy()
+		end
 	end
-	if not Lighting:FindFirstChildOfClass("Sky") then
-		local sky = Instance.new("Sky")
-		sky.Name = "GarazhSky"
-		sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-		sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-		sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-		sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-		sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-		sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-		sky.SunAngularSize = 12
-		sky.Parent = Lighting
+	local existing = Lighting:FindFirstChildOfClass("Sky")
+	if existing then
+		existing:Destroy()
 	end
+	local sky = Instance.new("Sky")
+	sky.Name = "GarazhSky"
+	sky.SkyboxBk = "rbxassetid://12064107"
+	sky.SkyboxDn = "rbxassetid://12064152"
+	sky.SkyboxFt = "rbxassetid://12064121"
+	sky.SkyboxLf = "rbxassetid://12063984"
+	sky.SkyboxRt = "rbxassetid://12064115"
+	sky.SkyboxUp = "rbxassetid://12064131"
+	sky.SunAngularSize = 18
+	sky.StarCount = 0
+	sky.Parent = Lighting
+	Lighting.ClockTime = 14.6
+	Lighting.Brightness = 2.3
+	Lighting.FogColor = Color3.fromRGB(176, 198, 220)
+	Lighting.FogStart = 400
+	Lighting.FogEnd = 2800
 end
 
 function World.pad(center: Vector3, span: number)

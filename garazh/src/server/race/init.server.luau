@@ -21,7 +21,7 @@ ProfileService.start()
 VehicleDriver.bindServer()
 Workspace.Gravity = 196.2
 World.dress()
-World.pad(Vector3.zero, 2200)
+World.pad(Vector3.zero, 3600)
 
 local remotesFolder = Instance.new("Folder")
 remotesFolder.Name = "Remotes"

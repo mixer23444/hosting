@@ -34,8 +34,8 @@ function GarageBuilder.build(origin: CFrame): Model
 	-- Floor and the apron outside the open door (+Z).
 	local floor = World.part(model, {
 		name = "Floor",
-		size = Vector3.new(30, 1, 26),
-		cframe = at(0, -0.5, -1),
+		size = Vector3.new(30, 1, 44),
+		cframe = at(0, -0.5, 2),
 		color = CONCRETE,
 		material = Enum.Material.Concrete,
 	})
@@ -43,7 +43,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local apron = World.part(model, {
 		name = "Apron",
 		size = Vector3.new(30, 1, 24),
-		cframe = at(0, -0.55, 22),
+		cframe = at(0, -0.55, 36),
 		color = ASPHALT,
 		material = Enum.Material.Asphalt,
 	})
@@ -52,7 +52,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "Threshold",
 		size = Vector3.new(30, 0.08, 0.4),
-		cframe = at(0, 0.02, 12),
+		cframe = at(0, 0.02, 24),
 		color = Color3.fromRGB(96, 96, 98),
 		material = Enum.Material.DiamondPlate,
 		collide = false,
@@ -61,16 +61,16 @@ function GarageBuilder.build(origin: CFrame): Model
 	-- Shell. Open front. Back wall is split so the windows are real openings.
 	local wallLeft = World.part(model, {
 		name = "WallLeft",
-		size = Vector3.new(0.7, 10, 26),
-		cframe = at(-15.35, 5, -1),
+		size = Vector3.new(0.7, 10, 40),
+		cframe = at(-15.35, 5, 0),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
 	World.tile(wallLeft, "rbxassetid://7547630026", Enum.NormalId.Right, 8)
 	local wallRight = World.part(model, {
 		name = "WallRight",
-		size = Vector3.new(0.7, 10, 26),
-		cframe = at(15.35, 5, -1),
+		size = Vector3.new(0.7, 10, 40),
+		cframe = at(15.35, 5, 0),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
@@ -78,7 +78,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local wallBack = World.part(model, {
 		name = "WallBackLow",
 		size = Vector3.new(30, 3.4, 0.7),
-		cframe = at(0, 1.7, -14.35),
+		cframe = at(0, 1.7, -20.35),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
@@ -86,7 +86,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "WallBackHigh",
 		size = Vector3.new(30, 2.2, 0.7),
-		cframe = at(0, 8.9, -14.35),
+		cframe = at(0, 8.9, -20.35),
 		color = CONCRETE_DARK,
 		material = Enum.Material.Concrete,
 	})
@@ -110,7 +110,7 @@ function GarageBuilder.build(origin: CFrame): Model
 			local pane = World.part(model, {
 				name = "Window",
 				size = Vector3.new(width - 0.3, 4.2, 0.16),
-				cframe = at(center, 5.6, -14.35),
+				cframe = at(center, 5.6, -20.35),
 				color = Color3.fromRGB(186, 198, 206),
 				material = Enum.Material.Glass,
 				transparency = 0.35,
@@ -130,7 +130,7 @@ function GarageBuilder.build(origin: CFrame): Model
 			World.part(model, {
 				name = "Pier",
 				size = Vector3.new(width, 4.4, 0.7),
-				cframe = at(center, 5.6, -14.35),
+				cframe = at(center, 5.6, -20.35),
 				color = CONCRETE_DARK,
 				material = Enum.Material.Concrete,
 			})
@@ -139,15 +139,15 @@ function GarageBuilder.build(origin: CFrame): Model
 
 	World.part(model, {
 		name = "RoofLeft",
-		size = Vector3.new(11, 0.4, 26),
-		cframe = at(-9.5, 10.2, -1),
+		size = Vector3.new(11, 0.4, 40),
+		cframe = at(-9.5, 10.2, 0),
 		color = CONCRETE,
 		material = Enum.Material.Concrete,
 	})
 	World.part(model, {
 		name = "RoofRight",
-		size = Vector3.new(11, 0.4, 26),
-		cframe = at(9.5, 10.2, -1),
+		size = Vector3.new(11, 0.4, 40),
+		cframe = at(9.5, 10.2, 0),
 		color = CONCRETE,
 		material = Enum.Material.Concrete,
 	})
@@ -177,7 +177,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		local column = World.part(model, {
 			name = name,
 			size = Vector3.new(0.55, 7.4, 0.55),
-			cframe = at(x, 3.7, -11.2),
+			cframe = at(x, 3.7, -17.2),
 			color = steel,
 			material = Enum.Material.DiamondPlate,
 			reflectance = 0.18,
@@ -185,7 +185,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = name .. "Base",
 			size = Vector3.new(1.3, 0.18, 1.3),
-			cframe = at(x, 0.1, -11.2),
+			cframe = at(x, 0.1, -17.2),
 			color = steel,
 			material = Enum.Material.Metal,
 			reflectance = 0.25,
@@ -193,7 +193,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = name .. "Stripe",
 			size = Vector3.new(0.58, 0.35, 0.58),
-			cframe = at(x, 1.4, -11.2),
+			cframe = at(x, 1.4, -17.2),
 			color = Color3.fromRGB(214, 168, 42),
 			material = Enum.Material.Metal,
 			reflectance = 0.2,
@@ -205,7 +205,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "LiftBeam",
 		size = Vector3.new(9.6, 0.4, 0.5),
-		cframe = at(0, 7.35, -11.2),
+		cframe = at(0, 7.35, -17.2),
 		color = steel,
 		material = Enum.Material.DiamondPlate,
 		reflectance = 0.16,
@@ -213,7 +213,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "LiftRam",
 		size = Vector3.new(5.2, 0.42, 0.42),
-		cframe = at(0, 3.1, -11.2, 0, 0, 90),
+		cframe = at(0, 3.1, -17.2, 0, 0, 90),
 		color = Color3.fromRGB(48, 50, 54),
 		material = Enum.Material.Metal,
 		reflectance = 0.35,
@@ -222,7 +222,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	World.part(model, {
 		name = "LiftPiston",
 		size = Vector3.new(3.2, 0.22, 0.22),
-		cframe = at(0, 4.4, -11.2, 0, 0, 90),
+		cframe = at(0, 4.4, -17.2, 0, 0, 90),
 		color = chrome,
 		material = Enum.Material.Metal,
 		reflectance = 0.55,
@@ -232,7 +232,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = "LiftArm",
 			size = Vector3.new(0.35, 0.22, 3.6),
-			cframe = at(x, 1.35, -9.3),
+			cframe = at(x, 1.35, -15.3),
 			color = steel,
 			material = Enum.Material.Metal,
 			reflectance = 0.28,
@@ -240,7 +240,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = "LiftPad",
 			size = Vector3.new(0.7, 0.12, 0.7),
-			cframe = at(x, 1.15, -7.6),
+			cframe = at(x, 1.15, -13.6),
 			color = Color3.fromRGB(196, 154, 36),
 			material = Enum.Material.Metal,
 			reflectance = 0.2,
@@ -249,7 +249,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local carriage = World.part(model, {
 		name = "LiftCarriage",
 		size = Vector3.new(8.4, 0.2, 2.4),
-		cframe = at(0, 1.55, -11.2),
+		cframe = at(0, 1.55, -17.2),
 		color = Color3.fromRGB(90, 94, 100),
 		material = Enum.Material.DiamondPlate,
 		reflectance = 0.22,
@@ -323,7 +323,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local slot = World.part(model, {
 		name = "CarSlot",
 		size = Vector3.new(1, 1, 1),
-		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y + 0.7, 6), Vector3.new(0, Config.CHASSIS_Y + 0.7, 24)),
+		cframe = CFrame.lookAt(Vector3.new(0, Config.CHASSIS_Y + 0.05, 2), Vector3.new(0, Config.CHASSIS_Y + 0.05, 24)),
 		transparency = 1,
 		collide = false,
 		shadow = false,
@@ -333,7 +333,7 @@ function GarageBuilder.build(origin: CFrame): Model
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "Spawn"
 	spawn.Size = Vector3.new(6, 0.3, 6)
-	spawn.CFrame = CFrame.lookAt(Vector3.new(0, 0.15, 20), Vector3.new(0, 0.15, 0))
+	spawn.CFrame = CFrame.lookAt(Vector3.new(0, 0.15, 30), Vector3.new(0, 0.15, 0))
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
