@@ -86,8 +86,8 @@ local function addWheel(model: Model, chassis: BasePart, constraints: Folder, na
 		servo.Attachment1 = hubAtt
 		servo.ActuatorType = Enum.ActuatorType.Servo
 		servo.ServoMaxTorque = 80000
-		servo.AngularSpeed = 3
-		servo.AngularResponsiveness = 30
+		servo.AngularSpeed = 2.2
+		servo.AngularResponsiveness = 45
 		servo.TargetAngle = 0
 		servo.LimitsEnabled = true
 		servo.LowerAngle = -34

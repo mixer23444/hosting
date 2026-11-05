@@ -75,7 +75,7 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 			World.part(parent, {
 				name = "Lane",
 				size = Vector3.new(0.32, 0.05, length + 0.35),
-				cframe = cf * CFrame.new(side * (width * 0.5 - 1.8), 0.06, 0),
+				cframe = cf * CFrame.new(side * (width * 0.5 - 1.8), 0.2, 0),
 				color = paint,
 				material = Enum.Material.SmoothPlastic,
 				collide = false,
@@ -85,7 +85,7 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 		World.part(parent, {
 			name = "Dash",
 			size = Vector3.new(0.28, 0.04, math.max(1.4, length * 0.38)),
-			cframe = cf * CFrame.new(0, 0.07, 0),
+			cframe = cf * CFrame.new(0, 0.22, 0),
 			color = paint,
 			material = Enum.Material.SmoothPlastic,
 			collide = false,
@@ -96,7 +96,7 @@ function TrackMesh.lay(parent: Instance, points: { Vector3 }, width: number)
 			World.part(parent, {
 				name = "Curb",
 				size = Vector3.new(1.35, 0.32, length + 0.45),
-				cframe = cf * CFrame.new(side * (width * 0.5 - 0.5), 0.16, 0),
+				cframe = cf * CFrame.new(side * (width * 0.5 - 0.5), 0.28, 0),
 				color = if side < 0 then Color3.fromRGB(186, 58, 46) else Color3.fromRGB(226, 226, 220),
 				material = Enum.Material.Concrete,
 			})

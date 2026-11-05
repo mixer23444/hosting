@@ -35,7 +35,7 @@ function VehicleDriver.step(model: Model, dt: number)
 		return
 	end
 	local chassis = model.PrimaryPart
-	local seat = model:FindFirstChild("Seat")
+	local seat = model:FindFirstChild("Seat", true)
 	if not chassis or not chassis:IsA("BasePart") or not seat or not seat:IsA("VehicleSeat") then
 		return
 	end
@@ -45,6 +45,12 @@ function VehicleDriver.step(model: Model, dt: number)
 
 	local throttle = seat.ThrottleFloat
 	local steer = seat.SteerFloat
+	if math.abs(steer) < 0.12 then
+		steer = 0
+	end
+	if math.abs(throttle) < 0.08 then
+		throttle = 0
+	end
 	local radius = attr(model, "WheelRadius", Config.WHEEL_RADIUS)
 	local maxSpeed = attr(model, "MaxSpeed", 60)
 	local torque = attr(model, "Torque", 500)
@@ -68,7 +74,7 @@ function VehicleDriver.step(model: Model, dt: number)
 						constraint.AngularVelocity = 0
 					end
 				elseif role == "steer" then
-					constraint.TargetAngle = Config.STEER_SIGN * steer * steerAngle
+					constraint.TargetAngle = if steer == 0 then 0 else Config.STEER_SIGN * steer * steerAngle
 				end
 			end
 		end

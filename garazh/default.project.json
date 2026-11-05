@@ -42,12 +42,12 @@
       "Sky": {
         "$className": "Sky",
         "$properties": {
-          "SkyboxBk": "rbxassetid://401664839",
-          "SkyboxDn": "rbxassetid://401664862",
-          "SkyboxFt": "rbxassetid://401664960",
-          "SkyboxLf": "rbxassetid://401664881",
-          "SkyboxRt": "rbxassetid://401664901",
-          "SkyboxUp": "rbxassetid://401664936",
+          "SkyboxBk": "rbxassetid://271042516",
+          "SkyboxDn": "rbxassetid://271077243",
+          "SkyboxFt": "rbxassetid://271042556",
+          "SkyboxLf": "rbxassetid://271042310",
+          "SkyboxRt": "rbxassetid://271042467",
+          "SkyboxUp": "rbxassetid://271077958",
           "SunAngularSize": 16,
           "StarCount": 0,
           "CelestialBodiesShown": true

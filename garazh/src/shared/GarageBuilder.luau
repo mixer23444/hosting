@@ -407,7 +407,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = "LaneDash",
 			size = Vector3.new(0.35, 0.06, 4),
-			cframe = at(0, 0.04, z),
+			cframe = at(0, 0.22, z),
 			color = Color3.fromRGB(230, 228, 216),
 			material = Enum.Material.SmoothPlastic,
 			collide = false,
@@ -436,7 +436,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = "Crosswalk",
 			size = Vector3.new(1.15, 0.05, 8),
-			cframe = at(i * 1.7, 0.05, 40),
+			cframe = at(i * 1.7, 0.22, 40),
 			color = Color3.fromRGB(236, 234, 226),
 			material = Enum.Material.SmoothPlastic,
 			collide = false,
@@ -447,7 +447,7 @@ function GarageBuilder.build(origin: CFrame): Model
 		World.part(model, {
 			name = "LaneEdge",
 			size = Vector3.new(0.22, 0.05, 160),
-			cframe = at(side * 9.2, 0.05, 115),
+			cframe = at(side * 9.2, 0.22, 115),
 			color = Color3.fromRGB(232, 230, 220),
 			material = Enum.Material.SmoothPlastic,
 			collide = false,

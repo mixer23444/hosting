@@ -201,14 +201,15 @@ end
 
 local function seatPlayer(player: Player, model: Model)
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	local seat = model:FindFirstChild("Seat")
+	local seat = model:FindFirstChild("Seat", true)
 	if humanoid and seat and seat:IsA("VehicleSeat") then
 		seat.Disabled = false
-		task.defer(function()
-			if seat.Parent and humanoid.Parent then
-				seat:Sit(humanoid)
-			end
-		end)
+		seat.MaxSpeed = 0
+		seat.Torque = 0
+		seat.TurnSpeed = 0
+		humanoid.Sit = true
+		seat:Sit(humanoid)
+		humanoid:ChangeState(Enum.HumanoidStateType.Seated)
 	end
 end
 

@@ -50,7 +50,38 @@ function World.part(parent: Instance, props: PartProps): BasePart
 		(part :: Part).Shape = Enum.PartType.Ball
 	end
 	part.Parent = parent
+	World.dressSurface(part)
 	return part
+end
+
+-- Image textures, not flat plastic. Glass stays clear so windows read as glass.
+local SURFACE = {
+	[Enum.Material.Brick] = { "rbxassetid://131227297", 4 },
+	[Enum.Material.Asphalt] = { "rbxassetid://7551987784", 14 },
+	[Enum.Material.DiamondPlate] = { "rbxassetid://7547304724", 3 },
+	[Enum.Material.Metal] = { "rbxassetid://7547304724", 4 },
+	[Enum.Material.Wood] = { "rbxassetid://28720778", 4 },
+	[Enum.Material.WoodPlanks] = { "rbxassetid://28720778", 4 },
+	[Enum.Material.Concrete] = { "rbxassetid://7547630026", 6 },
+}
+
+function World.dressSurface(part: BasePart)
+	if part.Material == Enum.Material.Glass or part.Material == Enum.Material.SmoothPlastic or part.Material == Enum.Material.Neon then
+		return
+	end
+	if part.Transparency >= 0.9 then
+		return
+	end
+	local spec = SURFACE[part.Material] or SURFACE[Enum.Material.Concrete]
+	for _, face in {
+		Enum.NormalId.Top,
+		Enum.NormalId.Front,
+		Enum.NormalId.Back,
+		Enum.NormalId.Left,
+		Enum.NormalId.Right,
+	} do
+		World.tile(part, spec[1], face, spec[2])
+	end
 end
 
 function World.weld(a: BasePart, b: BasePart)
@@ -84,13 +115,13 @@ function World.dress()
 	end
 	local sky = Instance.new("Sky")
 	sky.Name = "GarazhSky"
-	sky.SkyboxBk = "rbxassetid://401664839"
-	sky.SkyboxDn = "rbxassetid://401664862"
-	sky.SkyboxFt = "rbxassetid://401664960"
-	sky.SkyboxLf = "rbxassetid://401664881"
-	sky.SkyboxRt = "rbxassetid://401664901"
-	sky.SkyboxUp = "rbxassetid://401664936"
-	sky.SunAngularSize = 16
+	sky.SkyboxBk = "rbxassetid://271042516"
+	sky.SkyboxDn = "rbxassetid://271077243"
+	sky.SkyboxFt = "rbxassetid://271042556"
+	sky.SkyboxLf = "rbxassetid://271042310"
+	sky.SkyboxRt = "rbxassetid://271042467"
+	sky.SkyboxUp = "rbxassetid://271077958"
+	sky.SunAngularSize = 11
 	sky.StarCount = 0
 	sky.CelestialBodiesShown = true
 	sky.Parent = Lighting
@@ -100,41 +131,35 @@ function World.dress()
 		atmosphere = Instance.new("Atmosphere")
 		atmosphere.Parent = Lighting
 	end
-	atmosphere.Density = 0.22
-	atmosphere.Offset = 0.2
-	atmosphere.Color = Color3.fromRGB(168, 190, 210)
-	atmosphere.Decay = Color3.fromRGB(120, 138, 156)
-	atmosphere.Glare = 0.35
-	atmosphere.Haze = 0.35
+	atmosphere.Density = 0.18
+	atmosphere.Offset = 0.25
+	atmosphere.Color = Color3.fromRGB(190, 198, 206)
+	atmosphere.Decay = Color3.fromRGB(150, 160, 170)
+	atmosphere.Glare = 0.08
+	atmosphere.Haze = 0.4
 
-	Lighting.ClockTime = 15.1
-	Lighting.Brightness = 2.4
-	Lighting.OutdoorAmbient = Color3.fromRGB(150, 156, 162)
-	Lighting.Ambient = Color3.fromRGB(48, 50, 54)
-	Lighting.FogColor = Color3.fromRGB(168, 186, 204)
-	Lighting.FogStart = 1400
-	Lighting.FogEnd = 6000
+	Lighting.ClockTime = 13.2
+	Lighting.Brightness = 2
+	Lighting.OutdoorAmbient = Color3.fromRGB(160, 168, 176)
+	Lighting.Ambient = Color3.fromRGB(70, 74, 80)
+	Lighting.ColorShift_Top = Color3.fromRGB(210, 218, 224)
+	Lighting.ColorShift_Bottom = Color3.fromRGB(170, 176, 182)
+	Lighting.FogColor = Color3.fromRGB(186, 194, 202)
+	Lighting.FogStart = 1800
+	Lighting.FogEnd = 7000
 end
 
 function World.pad(center: Vector3, span: number)
-	local thickness = 8
+	-- Buried under the street so it cannot z-fight the asphalt.
+	local thickness = 6
 	local concrete = World.part(Workspace, {
 		name = "ConcretePad",
-		size = Vector3.new(span + 80, thickness, span + 80),
-		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.2, center.Z),
-		color = Color3.fromRGB(132, 130, 124),
+		size = Vector3.new(span, thickness, span),
+		cframe = CFrame.new(center.X, -thickness * 0.5 - 1.4, center.Z),
+		color = Color3.fromRGB(120, 118, 112),
 		material = Enum.Material.Concrete,
 	})
-	World.tile(concrete, "rbxassetid://7547337977", Enum.NormalId.Top, 16)
-	local pad = World.part(Workspace, {
-		name = "AsphaltPad",
-		size = Vector3.new(span, thickness, span),
-		cframe = CFrame.new(center.X, -thickness * 0.5 - 0.02, center.Z),
-		color = Color3.fromRGB(48, 48, 50),
-		material = Enum.Material.Asphalt,
-	})
-	World.tile(pad, "rbxassetid://7551987784", Enum.NormalId.Top, 22)
-	return pad
+	return concrete
 end
 
 function World.markPaint(part: BasePart)
