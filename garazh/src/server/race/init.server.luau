@@ -19,7 +19,6 @@ local ProfileService = require(script.Parent.ProfileService)
 ProfileService.start()
 VehicleDriver.bindServer()
 Workspace.Gravity = 196.2
-Workspace.FallenPartsDestroyHeight = -80
 
 local remotesFolder = Instance.new("Folder")
 remotesFolder.Name = "Remotes"
