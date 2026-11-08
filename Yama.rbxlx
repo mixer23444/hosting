@@ -33,7 +33,7 @@ Players.CharacterAutoLoads = true
 
 local MATCH_LEN = 480
 local CREATURE_AT = 240
-local COUNTDOWN = 3
+local SWAP_WAIT = 180
 local WIN_KILLS = 20
 local LEVEL_XP = { 0, 50, 120, 220, 360, 540 }
 
@@ -85,6 +85,7 @@ local shopPos = Vector3.new(118, 3, 40)
 local playersState = {}
 local dummyByModel = {}
 local turrets = {}
+local puddles = {}
 local projectiles = {}
 local creature = nil
 local creatureCd = {}
@@ -222,6 +223,53 @@ local function buildWorld()
 		collide = false,
 		query = false,
 	})
+	for n = 1, 8 do
+		local angle = (n / 8) * math.pi * 2
+		part({
+			name = "Reed",
+			parent = water,
+			shape = Enum.PartType.Cylinder,
+			size = Vector3.new(3.2, 0.22, 0.22),
+			cf = CFrame.new(pond.X + math.cos(angle) * 16, 2.6, pond.Z + math.sin(angle) * 16) * CFrame.Angles(0, 0, math.rad(90)),
+			color = Color3.fromRGB(74, 128, 62),
+			material = Enum.Material.Grass,
+			collide = false,
+			query = false,
+		})
+		part({
+			name = "Pad",
+			parent = water,
+			shape = Enum.PartType.Cylinder,
+			size = Vector3.new(0.12, 2.2, 2.2),
+			cf = CFrame.new(pond.X + math.cos(angle) * 8, 1.55, pond.Z + math.sin(angle) * 8) * CFrame.Angles(0, 0, math.rad(90)),
+			color = Color3.fromRGB(58, 110, 54),
+			material = Enum.Material.Grass,
+			collide = false,
+			query = false,
+		})
+	end
+	local springSign = part({
+		name = "SpringSign",
+		parent = water,
+		size = Vector3.new(0.3, 1.6, 2.4),
+		cf = CFrame.lookAt(Vector3.new(pond.X + 18, 3.2, pond.Z), Vector3.new(0, 3.2, 0)),
+		color = Color3.fromRGB(86, 118, 78),
+		material = Enum.Material.Wood,
+		collide = false,
+	})
+	local springGui = Instance.new("SurfaceGui")
+	springGui.Face = Enum.NormalId.Front
+	springGui.CanvasSize = Vector2.new(240, 120)
+	springGui.LightInfluence = 0
+	springGui.Parent = springSign
+	local springText = Instance.new("TextLabel")
+	springText.Size = UDim2.fromScale(1, 1)
+	springText.BackgroundTransparency = 1
+	springText.TextColor3 = Color3.fromRGB(236, 244, 220)
+	springText.Font = Enum.Font.GothamBold
+	springText.TextSize = 28
+	springText.Text = "РОДНИК\nлечит и вяжет"
+	springText.Parent = springGui
 
 	local function blocked(x, z, radius)
 		local flat = Vector3.new(x, 0, z)
@@ -250,6 +298,17 @@ local function buildWorld()
 			cf = CFrame.new(x, 1.2 + trunkH / 2, z) * CFrame.Angles(0, 0, math.rad(90)),
 			color = Color3.fromRGB(118, 82, 50),
 			material = Enum.Material.Wood,
+		})
+		part({
+			name = "Root",
+			parent = trees,
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(2.4, 1.1, 2.4),
+			cf = CFrame.new(x, 1.5, z),
+			color = Color3.fromRGB(102, 72, 44),
+			material = Enum.Material.Wood,
+			collide = false,
+			query = false,
 		})
 		local crown = 1.2 + trunkH
 		local greens = {
@@ -353,6 +412,16 @@ local function buildWorld()
 			material = Enum.Material.Wood,
 			collide = false,
 		})
+		for _, side in { -1.8, 1.8 } do
+			part({
+				name = "BenchLeg",
+				parent = props,
+				size = Vector3.new(0.28, 1.1, 0.28),
+				cf = cf * CFrame.new(side, 0.05, 0.15),
+				color = Color3.fromRGB(96, 66, 40),
+				material = Enum.Material.Wood,
+			})
+		end
 	end
 
 	for n = 1, 28 do
@@ -455,6 +524,19 @@ local function buildWorld()
 			material = Enum.Material.Wood,
 			collide = false,
 		})
+		if i % 6 == 0 then
+			part({
+				name = "Lamp",
+				parent = lobby,
+				shape = Enum.PartType.Ball,
+				size = Vector3.new(0.7, 0.7, 0.7),
+				cf = cf * CFrame.new(0, 3.1, -7),
+				color = Color3.fromRGB(255, 206, 120),
+				material = Enum.Material.Neon,
+				collide = false,
+				query = false,
+			})
+		end
 	end
 
 	local shopCf = CFrame.lookAt(Vector3.new(shopPos.X, 3.3, shopPos.Z), Vector3.new(0, 3.3, 0))
@@ -748,6 +830,9 @@ local function newState()
 		castBoost = false,
 		lastCast = nil,
 		xpTick = 0,
+		swapAt = 0,
+		streak = 0,
+		guardUntil = 0,
 	}
 end
 
@@ -769,6 +854,7 @@ local function clearControl(st)
 	st.invisibleUntil = 0
 	st.whistleAt = 0
 	st.castBoost = false
+	st.guardUntil = 0
 end
 
 local function rootPart(model)
@@ -890,51 +976,23 @@ local ANIM_ID = {
 }
 
 local SOUND_ID = {
-	slash = "rbxasset://sounds/swordslash.wav",
-	lunge = "rbxasset://sounds/swordlunge.wav",
-	magic = "rbxasset://sounds/electronicpingshort.wav",
-	snap = "rbxasset://sounds/snap.wav",
+	slash = "rbxassetid://541909867",
+	lunge = "rbxassetid://9075321955",
+	magic = "rbxassetid://9119786033",
+	snap = "rbxassetid://9117840974",
 	water = "rbxasset://sounds/impact_water.mp3",
-	button = "rbxasset://sounds/button.wav",
-	switch = "rbxasset://sounds/switch.wav",
-	bass = "rbxasset://sounds/bass.wav",
-	rocket = "rbxasset://sounds/Rocket shot.wav",
-	glass = "rbxasset://sounds/glassbreak.wav",
-	splat = "rbxasset://sounds/splat.wav",
+	button = "rbxassetid://9117840974",
+	switch = "rbxassetid://9119595110",
+	bass = "rbxassetid://541909913",
+	rocket = "rbxassetid://9114324017",
+	glass = "rbxassetid://260429964",
+	splat = "rbxassetid://558642292",
 }
 
 local liveTrack = setmetatable({}, { __mode = "k" })
 
-local function playAnim(model, kind, speed)
-	local id = ANIM_ID[kind]
-	local humanoid = model and model:FindFirstChildOfClass("Humanoid")
-	if not id or not humanoid or not model:FindFirstChild("UpperTorso") then
-		return
-	end
-	local animator = humanoid:FindFirstChildOfClass("Animator")
-	if not animator then
-		animator = Instance.new("Animator")
-		animator.Parent = humanoid
-	end
-	local previous = liveTrack[model]
-	if previous then
-		pcall(function()
-			previous:Stop(0.05)
-		end)
-	end
-	local ok, track = pcall(function()
-		local anim = Instance.new("Animation")
-		anim.AnimationId = id
-		local loaded = animator:LoadAnimation(anim)
-		anim:Destroy()
-		return loaded
-	end)
-	if not ok or not track then
-		return
-	end
-	liveTrack[model] = track
-	track.Priority = Enum.AnimationPriority.Action
-	track:Play(0.05, 1, speed or 1)
+local function playAnim()
+	-- Взмахи каталога двигают HumanoidRootPart и отбрасывают бойца. Эффект рисуется отдельно.
 end
 
 local function sfx(position, name, volume, pitch)
@@ -953,12 +1011,40 @@ local function sfx(position, name, volume, pitch)
 	host.Parent = fxFolder
 	local sound = Instance.new("Sound")
 	sound.SoundId = id
-	sound.Volume = volume or 0.55
+	sound.Volume = volume or 0.42
 	sound.PlaybackSpeed = pitch or 1
-	sound.RollOffMaxDistance = 140
+	sound.RollOffMaxDistance = 110
+	sound.Looped = false
 	sound.Parent = host
 	sound:Play()
-	Debris:AddItem(host, 4)
+	task.delay(0.7, function()
+		if sound.Parent then
+			sound:Stop()
+		end
+	end)
+	Debris:AddItem(host, 2)
+end
+
+local function swipe(entry, color)
+	local root = rootPart(entry.model)
+	if not root then
+		return
+	end
+	local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+	if flat.Magnitude < 0.1 then
+		return
+	end
+	local blade = Instance.new("Part")
+	blade.Name = "Swipe"
+	blade.Size = Vector3.new(0.25, 1.6, 3.4)
+	blade.Material = Enum.Material.Neon
+	blade.Color = color or Color3.fromRGB(255, 244, 220)
+	blade.Anchored = true
+	blade.CanCollide = false
+	blade.CanQuery = false
+	blade.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 1.5, 0) + flat.Unit * 3.2, root.Position + flat)
+	blade.Parent = fxFolder
+	Debris:AddItem(blade, 0.12)
 end
 
 local function cue(entry, animKind, soundName, pitch, speed)
@@ -967,9 +1053,10 @@ local function cue(entry, animKind, soundName, pitch, speed)
 	end
 	local pos = posOfModel(entry.model)
 	if pos then
-		sfx(pos, soundName, 0.6, pitch)
+		sfx(pos, soundName, 0.42, pitch)
 	end
-	playAnim(entry.model, animKind, speed)
+	local info = entry.state and entry.state.fighter and FIGHTERS[entry.state.fighter]
+	swipe(entry, info and info.color)
 end
 
 local function beamVisual(a, b, color, life)
@@ -1075,7 +1162,10 @@ local function face(entry, aim)
 	if flat.Magnitude < 0.2 then
 		return
 	end
+	local vel = root.AssemblyLinearVelocity
 	root.CFrame = CFrame.new(root.Position, root.Position + flat)
+	root.AssemblyLinearVelocity = vel
+	root.AssemblyAngularVelocity = Vector3.zero
 end
 
 local function breakInvis(st)
@@ -1125,9 +1215,6 @@ end
 local function statusLine()
 	if phase == "lobby" then
 		return "Выбери бойца"
-	end
-	if phase == "countdown" then
-		return string.format("Старт через %d", math.max(0, math.ceil(countdownEnd - os.clock())))
 	end
 	if phase == "ending" then
 		return winnerText
@@ -1187,6 +1274,8 @@ local function kill(source, target)
 	st.hp = 0
 	st.channel = nil
 	st.rooted = false
+	st.streak = 0
+	st.guardUntil = 0
 	local deathPos = posOfModel(target.model)
 	if target.kind == "player" then
 		st.deaths += 1
@@ -1209,8 +1298,17 @@ local function kill(source, target)
 	end
 	if source and source.kind == "player" and source.state then
 		source.state.kills += 1
+		source.state.streak = (source.state.streak or 0) + 1
 		source.state.gold += 60
 		grantXp(source.state, 120)
+		if source.state.streak % 3 == 0 then
+			source.state.gold += 45
+			source.state.hasteUntil = os.clock() + 4
+			source.state.hasteMul = 1.4
+			if deathPos then
+				floatText(deathPos + Vector3.new(0, 2, 0), "серия +45", Color3.fromRGB(255, 196, 80))
+			end
+		end
 		if deathPos then
 			floatText(deathPos, "+1", Color3.fromRGB(255, 220, 140))
 		end
@@ -1271,7 +1369,7 @@ applyDamage = function(source, target, amount, kind, flags)
 	end
 	local now = os.clock()
 	local spell = kind ~= "physical" or flags.projectile
-	if st.reflectUntil > now and not flags.reflected and spell and source and source.model ~= target.model then
+	if st.reflectUntil > now and not flags.reflected and not flags.thorns and spell and source and source.model ~= target.model then
 		st.reflectUntil = 0
 		st.hasteUntil = now + 1.2
 		st.hasteMul = 1.3
@@ -1293,6 +1391,12 @@ applyDamage = function(source, target, amount, kind, flags)
 	end
 	if st.rooted and now < st.rootUntil then
 		amount *= 0.75
+	end
+	if now < (st.guardUntil or 0) then
+		amount *= 0.62
+		if source and source.state and source.model ~= target.model and not flags.thorns and kind == "physical" then
+			applyDamage(target, source, 14, "physical", { thorns = true })
+		end
 	end
 	if amount <= 0 then
 		return
@@ -1327,8 +1431,7 @@ tapCreature = function(player)
 	st.gold += 80
 	burst(creature.PrimaryPart.Position, Color3.fromRGB(255, 190, 80), 3, 0.2)
 	floatText(creature.PrimaryPart.Position, "+80", Color3.fromRGB(255, 210, 90))
-	sfx(creature.PrimaryPart.Position, "splat", 0.5, 1.25)
-	playAnim(character, "cheer", 1)
+	sfx(creature.PrimaryPart.Position, "splat", 0.45, 1.1)
 end
 
 local function nearestEnemy(entry, reach)
@@ -1443,38 +1546,38 @@ local castQ
 local castE
 
 local function castDictorQ(entry, replayMul)
-	local target = nearestEnemy(entry, 34)
-	if not target then
+	local root = rootPart(entry.model)
+	if not root then
 		return false
 	end
 	local mul = takeMul(entry.state) * replayMul
-	local pos = posOfModel(target.model)
-	if pos then
-		burst(pos, Color3.fromRGB(120, 170, 255), 5, 0.3)
+	local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+	if flat.Magnitude < 0.1 then
+		return false
 	end
-	applyDamage(entry, target, 90 * mul, "pure")
-	local roll = math.random(4)
-	local dur = 1.2 * replayMul
-	if roll == 1 then
-		cc(target, "stun", 1.1 * replayMul, entry)
-	elseif roll == 2 then
-		cc(target, "silence", 1.6 * replayMul, entry)
-	elseif roll == 3 then
-		cc(target, "slow", 2 * replayMul, entry)
-	else
-		cc(target, "disarm", dur, entry)
+	local origin = root.Position + Vector3.new(0, 1.4, 0)
+	local dest = origin + flat.Unit * 42
+	beamVisual(origin, dest, Color3.fromRGB(120, 180, 255), 0.28)
+	local hit = false
+	for _, enemy in enemiesOf(entry) do
+		local pos = posOfModel(enemy.model)
+		if pos and distToSegment(pos, origin, dest) <= 3.4 then
+			applyDamage(entry, enemy, 78 * mul, "pure")
+			cc(enemy, "silence", 1.5 * replayMul, entry)
+			hit = true
+		end
 	end
-	return true
+	return hit or true
 end
 
 local function castTumbaQ(entry, replayMul)
 	local st = entry.state
 	takeMul(st)
-	st.rooted = true
-	st.rootUntil = os.clock() + 3.5 * replayMul
+	st.guardUntil = os.clock() + 3.4 * replayMul
 	local pos = posOfModel(entry.model)
 	if pos then
-		burst(pos, Color3.fromRGB(200, 120, 70), 6, 0.35)
+		burst(pos, Color3.fromRGB(200, 120, 70), 7, 0.4)
+		floatText(pos, "пень", Color3.fromRGB(220, 150, 90))
 	end
 	return true
 end
@@ -1482,7 +1585,7 @@ end
 local function castReflectQ(entry, replayMul)
 	local st = entry.state
 	takeMul(st)
-	st.reflectUntil = os.clock() + 0.6 * replayMul
+	st.reflectUntil = os.clock() + 1.15 * replayMul
 	local pos = posOfModel(entry.model)
 	if pos then
 		burst(pos, Color3.fromRGB(255, 220, 100), 5, 0.25)
@@ -1510,7 +1613,7 @@ local function castDvornikQ(entry, aim, replayMul)
 	end
 	local dist = math.clamp(flat.Magnitude, 6, 22)
 	local planted = root.Position + flat.Unit * dist
-	planted = Vector3.new(math.clamp(planted.X, -60, 60), 2.2, math.clamp(planted.Z, -60, 60))
+	planted = Vector3.new(math.clamp(planted.X, -140, 140), 2.2, math.clamp(planted.Z, -140, 140))
 	while countOwnTurrets(entry.player) >= 2 do
 		for index, turret in turrets do
 			if turret.owner == entry.player then
@@ -1591,14 +1694,19 @@ local function castDictorE(entry, replayMul)
 	local st = entry.state
 	takeMul(st)
 	local now = os.clock()
-	st.shield = 180 * replayMul
-	st.shieldUntil = now + 3 * replayMul
-	st.hasteUntil = now + 3 * replayMul
-	st.hasteMul = 1.25
-	cc(entry, "disarm", 3 * replayMul, entry)
+	st.shield = 80 * replayMul
+	st.shieldUntil = now + 2.4 * replayMul
+	st.hasteUntil = now + 2.4 * replayMul
+	st.hasteMul = 1.35
 	local pos = posOfModel(entry.model)
 	if pos then
-		burst(pos, Color3.fromRGB(140, 180, 255), 5, 0.3)
+		burst(pos, Color3.fromRGB(140, 180, 255), 8, 0.35)
+		for _, enemy in enemiesOf(entry) do
+			local enemyPos = posOfModel(enemy.model)
+			if enemyPos and (enemyPos - pos).Magnitude <= 16 then
+				cc(enemy, "slow", 2.2 * replayMul, entry)
+			end
+		end
 	end
 end
 
@@ -1614,8 +1722,7 @@ local function castTumbaE(entry, aim, replayMul)
 	if look.Magnitude < 0.1 then
 		return
 	end
-	local hits = coneEnemies(entry, 9, 0.15)
-	push(entry, -look, 62, true)
+	local hits = coneEnemies(entry, 11, 0.2)
 	for _, enemy in hits do
 		applyDamage(entry, enemy, 70 * mul, "physical")
 		local pos = posOfModel(enemy.model)
@@ -1627,32 +1734,50 @@ local function castTumbaE(entry, aim, replayMul)
 end
 
 local function castReflectE(entry, aim, replayMul)
-	local mul = takeMul(entry.state) * replayMul
-	face(entry, aim)
+	local st = entry.state
+	local mul = takeMul(st) * replayMul
 	local root = rootPart(entry.model)
 	if not root then
 		return
 	end
-	for _, enemy in coneEnemies(entry, 10, 0.35) do
-		applyDamage(entry, enemy, 85 * mul, "physical")
-		local pos = posOfModel(enemy.model)
-		if pos then
-			push(enemy, pos - root.Position, 46)
+	face(entry, aim)
+	local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+	if typeof(aim) == "Vector3" then
+		local aimed = Vector3.new(aim.X - root.Position.X, 0, aim.Z - root.Position.Z)
+		if aimed.Magnitude > 0.4 then
+			flat = aimed
 		end
 	end
-	burst(root.Position + root.CFrame.LookVector * 4, Color3.fromRGB(240, 210, 100), 3.5, 0.2)
+	if flat.Magnitude < 0.1 then
+		return
+	end
+	local dist = math.clamp(flat.Magnitude, 6, 12)
+	local dest = root.Position + flat.Unit * dist
+	dest = Vector3.new(math.clamp(dest.X, -150, 150), root.Position.Y, math.clamp(dest.Z, -150, 150))
+	local vel = root.AssemblyLinearVelocity
+	root.CFrame = CFrame.lookAt(dest, dest + flat)
+	root.AssemblyLinearVelocity = Vector3.new(vel.X, 0, vel.Z)
+	root.AssemblyAngularVelocity = Vector3.zero
+	burst(dest, Color3.fromRGB(240, 210, 100), 5, 0.25)
+	for _, enemy in enemiesOf(entry) do
+		local pos = posOfModel(enemy.model)
+		if pos and (Vector3.new(pos.X, 0, pos.Z) - Vector3.new(dest.X, 0, dest.Z)).Magnitude <= 8 then
+			applyDamage(entry, enemy, 70 * mul, "physical")
+		end
+	end
 end
 
 local function castDvornikE(entry, replayMul)
 	local st = entry.state
 	takeMul(st)
-	local heal = 50 * replayMul
+	local heal = 75 * replayMul
 	st.hp = math.min(st.maxHp, st.hp + heal)
 	local origin = posOfModel(entry.model)
 	if not origin then
 		return
 	end
-	burst(origin, Color3.fromRGB(120, 220, 140), 6, 0.3)
+	table.insert(puddles, { pos = origin, untilT = os.clock() + 4.5 * replayMul, owner = entry.player })
+	burst(origin, Color3.fromRGB(120, 220, 140), 7, 0.35)
 	for _, turret in turrets do
 		if turret.owner == entry.player and turret.model.PrimaryPart then
 			local pos = turret.model.PrimaryPart.Position
@@ -1711,16 +1836,32 @@ local function castR(entry, aim)
 	else
 		cue(entry, "wave", "snap", 1.25, 1.1)
 	end
-	if st.fighter == "dictor" or st.fighter == "dvornik" then
-		local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
-		if flat.Magnitude < 0.1 then
-			flat = Vector3.new(0, 0, -1)
+	local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+	if flat.Magnitude < 0.1 then
+		flat = Vector3.new(0, 0, -1)
+	end
+	flat = flat.Unit
+	if st.fighter == "dictor" then
+		local mul = takeMul(st)
+		local origin = root.Position + Vector3.new(0, 1.4, 0)
+		for step = 1, 3 do
+			local dest = origin + flat * (14 * step)
+			beamVisual(origin, dest, Color3.fromRGB(140, 190, 255), 0.22)
+			for _, enemy in enemiesOf(entry) do
+				local pos = posOfModel(enemy.model)
+				if pos and (pos - dest).Magnitude <= 6 then
+					applyDamage(entry, enemy, 36 * mul, "pure")
+				end
+			end
 		end
+		return
+	end
+	if st.fighter == "dvornik" then
 		st.channel = {
-			kind = st.fighter == "dictor" and "beam" or "hose",
-			untilT = os.clock() + (st.fighter == "dictor" and 2.2 or 1.6),
+			kind = "hose",
+			untilT = os.clock() + 1.3,
 			nextTick = os.clock(),
-			dir = flat.Unit,
+			dir = flat,
 			mul = takeMul(st),
 		}
 		return
@@ -1728,25 +1869,25 @@ local function castR(entry, aim)
 	if st.fighter == "tumba" then
 		local mul = takeMul(st)
 		st.bashReady = true
-		st.bashBonus = 80 * mul
+		st.bashBonus = 70 * mul
 		st.bashUntil = os.clock() + 6
 		floatText(root.Position, "баш", Color3.fromRGB(255, 180, 100))
 		burst(root.Position, Color3.fromRGB(255, 150, 80), 4, 0.25)
 		return
 	end
-	if st.lastCast == "q" then
-		castQ(entry, aim, true)
-	elseif st.lastCast == "e" then
-		castE(entry, aim, true)
-	else
-		local mul = takeMul(st)
-		for _, enemy in enemiesOf(entry) do
-			local pos = posOfModel(enemy.model)
-			if pos and (pos - root.Position).Magnitude <= 8 then
-				applyDamage(entry, enemy, 50 * mul, "physical")
-			end
+	st.stunUntil = 0
+	st.silenceUntil = 0
+	st.slowUntil = 0
+	st.disarmUntil = 0
+	local mul = takeMul(st)
+	floatText(root.Position, "чисто", Color3.fromRGB(255, 230, 140))
+	burst(root.Position, Color3.fromRGB(255, 220, 120), 8, 0.3)
+	for _, enemy in enemiesOf(entry) do
+		local pos = posOfModel(enemy.model)
+		if pos and (pos - root.Position).Magnitude <= 12 then
+			applyDamage(entry, enemy, 62 * mul, "pure")
+			push(enemy, pos - root.Position, 36)
 		end
-		burst(root.Position, Color3.fromRGB(240, 220, 120), 6, 0.25)
 	end
 end
 
@@ -1835,15 +1976,16 @@ local function attack(entry, aim)
 		st.bashReady = false
 		bonus = st.bashBonus or 80
 		cc(hits[1], "stun", 1.1, entry)
+		st.hp = math.min(st.maxHp, st.hp + 45)
 	elseif st.bashReady then
 		st.bashReady = false
 	end
 	local dealt = (info.basic + bonus) * levelMul
-	if st.rooted and now < st.rootUntil then
-		dealt *= 1.5
+	if now < (st.guardUntil or 0) then
+		dealt *= 1.35
 	end
 	applyDamage(entry, hits[1], dealt, "physical")
-	if st.rooted and now < st.rootUntil then
+	if now < (st.guardUntil or 0) then
 		local center = posOfModel(hits[1].model)
 		if center then
 			for index = 2, #hits do
@@ -1920,8 +2062,7 @@ local function buy(player, itemId)
 	st.gold -= spec.price
 	st.items[itemId] = true
 	floatText(root.Position, spec.name, Color3.fromRGB(240, 210, 140))
-	sfx(root.Position, "button", 0.55, 1)
-	playAnim(character, "cheer", 1)
+	sfx(root.Position, "button", 0.4, 1.05)
 end
 
 local function validAim(aim, origin)
@@ -2063,6 +2204,7 @@ end
 
 local function startFight()
 	phase = "fight"
+	puddles = {}
 	local now = os.clock()
 	matchEnd = now + MATCH_LEN
 	creatureTime = now + CREATURE_AT
@@ -2499,6 +2641,8 @@ local function snapshot(player)
 			shield = math.floor(st.shield),
 			rooted = st.rooted,
 			nearShop = root ~= nil and (root.Position - shopPos).Magnitude <= 16,
+			swapLeft = math.max(0, (st.swapAt or 0) - now),
+			streak = st.streak or 0,
 		}
 	end
 	local board = {}
@@ -2605,30 +2749,29 @@ pickRemote.OnServerEvent:Connect(function(player, fighterId)
 	if not st then
 		return
 	end
-	if st.fighter and phase == "fight" then
+	local now = os.clock()
+	if st.fighter and now < (st.swapAt or 0) then
 		return
 	end
 	local info = FIGHTERS[fighterId]
+	local levels = math.max(0, (st.level or 1) - 1)
 	st.fighter = fighterId
 	st.ownerPlayer = player
-	st.maxHp = info.hp
-	st.hp = info.hp
-	st.maxMana = 100
-	st.mana = 100
+	st.maxHp = info.hp + levels * 40
+	st.hp = st.maxHp
+	st.maxMana = 100 + levels * 10
+	st.mana = st.maxMana
 	st.baseSpeed = info.speed
-	st.level = 1
-	st.xp = 0
-	if player.Character then
-		paint(player.Character, info.color, info.name, st.hp, st.maxHp)
-	end
+	st.swapAt = now + SWAP_WAIT
+	clearControl(st)
 	if phase == "lobby" then
-		phase = "countdown"
-		countdownEnd = os.clock() + COUNTDOWN
+		startFight()
 	elseif phase == "fight" then
-		clearControl(st)
 		st.alive = true
-		if player.Character and rootPart(player.Character) then
-			teleport(player.Character, pitCFrame(player.UserId))
+		st.pendingSpawn = false
+		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if player.Character and rootPart(player.Character) and humanoid and humanoid.Health > 0 then
+			paint(player.Character, info.color, info.name, st.hp, st.maxHp)
 		else
 			st.pendingSpawn = true
 			player:LoadCharacter()
@@ -2697,6 +2840,35 @@ RunService.Heartbeat:Connect(function(dt)
 			local bob = 3.1 + math.sin(now * 3) * 0.35
 			creature.PrimaryPart.CFrame = CFrame.new(0, bob, 0)
 		end
+		local spring = Vector3.new(-88, 0, 62)
+		for _, player in Players:GetPlayers() do
+			local st = playersState[player]
+			local root = st and player.Character and rootPart(player.Character)
+			if st and st.alive and root then
+				local flat = Vector3.new(root.Position.X, 0, root.Position.Z)
+				if (flat - spring).Magnitude < 22 then
+					st.hp = math.min(st.maxHp, st.hp + 9 * dt)
+					st.slowUntil = math.max(st.slowUntil, now + 0.3)
+				end
+			end
+		end
+		for index = #puddles, 1, -1 do
+			local puddle = puddles[index]
+			if now >= puddle.untilT then
+				table.remove(puddles, index)
+			else
+				local ownerState = playersState[puddle.owner]
+				if ownerState then
+					local fake = { kind = "player", player = puddle.owner, state = ownerState, model = puddle.owner.Character }
+					for _, enemy in enemiesOf(fake) do
+						local pos = posOfModel(enemy.model)
+						if enemy.state and pos and (Vector3.new(pos.X, 0, pos.Z) - Vector3.new(puddle.pos.X, 0, puddle.pos.Z)).Magnitude <= 9 then
+							enemy.state.slowUntil = math.max(enemy.state.slowUntil, now + 0.35)
+						end
+					end
+				end
+			end
+		end
 		tickTurrets(now)
 		tickProjectiles(dt)
 		tickDummies(now)
@@ -2749,10 +2921,10 @@ local GOLD = Color3.fromRGB(224, 176, 78)
 local MUTED = Color3.fromRGB(176, 186, 162)
 
 local CHOICES = {
-	{ id = "dictor", name = "Диктор", line = "Реплика, пауза и луч", color = Color3.fromRGB(86, 148, 204) },
-	{ id = "tumba", name = "Тумба", line = "Врастает и бьёт башем", color = Color3.fromRGB(196, 122, 72) },
-	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа» и толчок", color = Color3.fromRGB(214, 176, 72) },
-	{ id = "dvornik", name = "Дворник", line = "Тумбы, полив, струя", color = Color3.fromRGB(78, 158, 96) },
+	{ id = "dictor", name = "Диктор", line = "Луч тишины, круг вязкости, три вспышки", color = Color3.fromRGB(86, 148, 204) },
+	{ id = "tumba", name = "Тумба", line = "Пень с шипами, толчок, баш лечит", color = Color3.fromRGB(196, 122, 72) },
+	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа», рывок, чистка", color = Color3.fromRGB(214, 176, 72) },
+	{ id = "dvornik", name = "Дворник", line = "Кадка, лужа, шланг", color = Color3.fromRGB(78, 158, 96) },
 }
 
 local KEYS = {
@@ -2767,9 +2939,9 @@ local KEYS = {
 
 local NAMES = {
 	dictor = { "Реплика", "Пауза", "Эфир" },
-	tumba = { "Врос", "Отскок", "Баш" },
-	otrazhatel = { "Опа", "Толчок", "Эхо" },
-	dvornik = { "Кадка", "Лейка", "Шланг" },
+	tumba = { "Пень", "Толчок", "Баш" },
+	otrazhatel = { "Опа", "Зеркало", "Чисто" },
+	dvornik = { "Кадка", "Лужа", "Шланг" },
 }
 local DISPLAY = {
 	dictor = "Диктор",
@@ -2781,6 +2953,9 @@ local FIGHTER_COLOR = {}
 for _, choice in CHOICES do
 	FIGHTER_COLOR[choice.id] = choice.color
 end
+
+local swapOpen = true
+local lastPacket = nil
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "Yama"
@@ -3061,9 +3236,37 @@ for index, choice in CHOICES do
 	line.TextWrapped = true
 	line.TextColor3 = MUTED
 	button.MouseButton1Click:Connect(function()
+		swapOpen = false
 		pickRemote:FireServer(choice.id)
 	end)
 end
+
+local swapButton = Instance.new("TextButton")
+swapButton.Size = UDim2.fromOffset(272, 36)
+swapButton.Position = UDim2.fromOffset(18, 304)
+swapButton.BackgroundColor3 = MOSS
+swapButton.TextColor3 = PAPER
+swapButton.Font = Enum.Font.GothamBold
+swapButton.TextSize = 15
+swapButton.Text = "Выбери бойца"
+swapButton.AutoButtonColor = true
+swapButton.Parent = gui
+corner(swapButton, 10)
+swapButton.MouseButton1Click:Connect(function()
+	local you = lastPacket and lastPacket.you
+	local picked = you and you.fighter
+	local ready = not picked or (you.swapLeft or 0) <= 0
+	if not ready then
+		return
+	end
+	if not picked then
+		swapOpen = true
+	else
+		swapOpen = not swapOpen
+	end
+	picker.Visible = swapOpen
+	dock.Visible = not picker.Visible
+end)
 
 local function fmtTime(seconds)
 	seconds = math.max(0, math.floor(seconds + 0.5))
@@ -3116,18 +3319,34 @@ local function applyState(packet)
 	if typeof(packet) ~= "table" then
 		return
 	end
+	lastPacket = packet
 	status.Text = packet.status or ""
 	if packet.phase == "fight" then
 		timer.Text = fmtTime(packet.timeLeft or 0)
-	elseif packet.phase == "countdown" then
-		timer.Text = "старт"
 	else
-		timer.Text = "парк открыт"
+		timer.Text = packet.phase == "ending" and "конец" or "парк открыт"
 	end
 	local you = packet.you
 	local picked = you and you.fighter
-	picker.Visible = packet.phase ~= "ending" and (not picked or packet.phase == "lobby" or packet.phase == "countdown")
+	local ready = not picked or (you.swapLeft or 0) <= 0
+	if not picked then
+		swapOpen = true
+	end
+	if packet.phase == "ending" then
+		swapOpen = false
+	end
+	picker.Visible = swapOpen and packet.phase ~= "ending" and ready
 	dock.Visible = not picker.Visible
+	if not picked then
+		swapButton.Text = "Выбери бойца"
+		swapButton.BackgroundColor3 = MOSS
+	elseif ready then
+		swapButton.Text = "Сменить бойца"
+		swapButton.BackgroundColor3 = MOSS
+	else
+		swapButton.Text = "Смена  " .. fmtTime(you.swapLeft or 0)
+		swapButton.BackgroundColor3 = Color3.fromRGB(48, 56, 44)
+	end
 	if you and picked then
 		nameLabel.Text = DISPLAY[you.fighter] or you.fighter
 		accent.BackgroundColor3 = FIGHTER_COLOR[you.fighter] or MOSS
@@ -3149,6 +3368,9 @@ local function applyState(packet)
 		end
 		if you.rooted then
 			extra ..= (extra ~= "" and "   " or "") .. "врос"
+		end
+		if you.streak and you.streak > 0 then
+			extra ..= (extra ~= "" and "   " or "") .. "серия " .. you.streak
 		end
 		if you.items and you.items.baton then
 			extra ..= (extra ~= "" and "   " or "") .. "батон"
@@ -3284,7 +3506,10 @@ RunService:BindToRenderStep("YamaShiftLock", Enum.RenderPriority.Camera.Value + 
 	local look = camera.CFrame.LookVector
 	local flat = Vector3.new(look.X, 0, look.Z)
 	if flat.Magnitude > 0.05 then
+		local vel = root.AssemblyLinearVelocity
 		root.CFrame = CFrame.new(root.Position, root.Position + flat)
+		root.AssemblyLinearVelocity = vel
+		root.AssemblyAngularVelocity = Vector3.zero
 	end
 end)
 
