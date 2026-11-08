@@ -252,28 +252,53 @@ local function buildWorld()
 			material = Enum.Material.Wood,
 		})
 		local crown = 1.2 + trunkH
+		local greens = {
+			Color3.fromRGB(46, 96, 44),
+			Color3.fromRGB(70, 124, 58),
+			Color3.fromRGB(98, 150, 68),
+			Color3.fromRGB(58, 108, 50),
+		}
 		part({
 			name = "Canopy",
 			parent = trees,
 			shape = Enum.PartType.Ball,
-			size = Vector3.new(8 + scale, 6 + scale * 0.35, 8 + scale),
-			cf = CFrame.new(x, crown + 1.2, z),
-			color = Color3.fromRGB(74, 132, 66),
+			size = Vector3.new(6.2 + scale * 0.6, 4.4 + scale * 0.2, 6.2 + scale * 0.6),
+			cf = CFrame.new(x, crown + 1.1, z),
+			color = greens[1],
 			material = Enum.Material.Grass,
 			collide = false,
 			query = false,
 		})
-		part({
-			name = "Canopy",
-			parent = trees,
-			shape = Enum.PartType.Ball,
-			size = Vector3.new(5.5 + scale * 0.4, 4.2, 5.5 + scale * 0.4),
-			cf = CFrame.new(x + 1.8, crown + 2.3, z - 1.3),
-			color = Color3.fromRGB(108, 158, 78),
-			material = Enum.Material.Grass,
-			collide = false,
-			query = false,
-		})
+		for i = 1, 6 do
+			local yaw = (i / 6) * math.pi * 2 + scale * 0.35
+			local ring = 2.1 + (i % 2) * 1.15
+			local lift = ((i % 3) - 1) * 1.05
+			part({
+				name = "Leaf",
+				parent = trees,
+				shape = Enum.PartType.Ball,
+				size = Vector3.new(3.1 + (i % 2) * 0.8, 2.2, 3.1 + (i % 2) * 0.8),
+				cf = CFrame.new(x + math.cos(yaw) * ring, crown + 1.5 + lift, z + math.sin(yaw) * ring),
+				color = greens[(i % #greens) + 1],
+				material = Enum.Material.Grass,
+				collide = false,
+				query = false,
+			})
+		end
+		for i = 1, 3 do
+			local yaw = (i / 3) * math.pi * 2 + 0.4
+			part({
+				name = "LeafTip",
+				parent = trees,
+				class = "WedgePart",
+				size = Vector3.new(1.3, 2.4, 2.8),
+				cf = CFrame.new(x + math.cos(yaw) * 3.1, crown + 2.4, z + math.sin(yaw) * 3.1) * CFrame.Angles(0, -yaw, math.rad(78)),
+				color = greens[(i % #greens) + 1],
+				material = Enum.Material.Grass,
+				collide = false,
+				query = false,
+			})
+		end
 	end
 
 	for n = 1, 10 do
@@ -433,63 +458,209 @@ local function buildWorld()
 	end
 
 	local shopCf = CFrame.lookAt(Vector3.new(shopPos.X, 3.3, shopPos.Z), Vector3.new(0, 3.3, 0))
+	part({
+		name = "Deck",
+		parent = shopFolder,
+		size = Vector3.new(16, 0.28, 11),
+		cf = shopCf * CFrame.new(0, -2.15, -0.6),
+		color = Color3.fromRGB(118, 84, 50),
+		material = Enum.Material.WoodPlanks,
+		collide = false,
+		query = false,
+	})
+	local function stallPost(offset)
+		part({
+			name = "Post",
+			parent = shopFolder,
+			size = Vector3.new(0.5, 7.4, 0.5),
+			cf = shopCf * CFrame.new(offset),
+			color = Color3.fromRGB(102, 70, 42),
+			material = Enum.Material.Wood,
+		})
+	end
+	stallPost(Vector3.new(-6.4, 1.3, -3.6))
+	stallPost(Vector3.new(6.4, 1.3, -3.6))
+	stallPost(Vector3.new(-6.4, 1.3, 2.2))
+	stallPost(Vector3.new(6.4, 1.3, 2.2))
+	part({
+		name = "Beam",
+		parent = shopFolder,
+		size = Vector3.new(13.6, 0.4, 0.4),
+		cf = shopCf * CFrame.new(0, 4.85, -3.6),
+		color = Color3.fromRGB(92, 62, 38),
+		material = Enum.Material.Wood,
+		collide = false,
+	})
+	part({
+		name = "Awning",
+		parent = shopFolder,
+		size = Vector3.new(14.2, 0.16, 7.2),
+		cf = shopCf * CFrame.new(0, 4.55, -1.1) * CFrame.Angles(math.rad(-7), 0, 0),
+		color = Color3.fromRGB(72, 122, 78),
+		material = Enum.Material.Fabric,
+		collide = false,
+		query = false,
+	})
+	part({
+		name = "AwningStripe",
+		parent = shopFolder,
+		size = Vector3.new(14.2, 0.14, 1.15),
+		cf = shopCf * CFrame.new(0, 4.28, -3.8) * CFrame.Angles(math.rad(-7), 0, 0),
+		color = Color3.fromRGB(214, 196, 118),
+		material = Enum.Material.Fabric,
+		collide = false,
+		query = false,
+	})
+	part({
+		name = "BackWall",
+		parent = shopFolder,
+		size = Vector3.new(12.6, 3.4, 0.35),
+		cf = shopCf * CFrame.new(0, 0.15, 2.15),
+		color = Color3.fromRGB(142, 98, 58),
+		material = Enum.Material.WoodPlanks,
+	})
 	local counter = part({
 		name = "Counter",
 		parent = shopFolder,
-		size = Vector3.new(12, 4.2, 3.4),
-		cf = shopCf,
+		size = Vector3.new(11.2, 3.6, 2.6),
+		cf = shopCf * CFrame.new(0, -0.2, -0.2),
 		color = Color3.fromRGB(164, 114, 68),
 		material = Enum.Material.Wood,
 	})
 	part({
 		name = "CounterTop",
 		parent = shopFolder,
-		size = Vector3.new(12.8, 0.35, 4),
-		cf = shopCf * CFrame.new(0, 2.25, 0),
+		size = Vector3.new(11.8, 0.28, 3.1),
+		cf = shopCf * CFrame.new(0, 1.7, -0.15),
 		color = Color3.fromRGB(214, 208, 198),
 		material = Enum.Material.Marble,
 		collide = false,
 	})
 	part({
-		name = "Awning",
+		name = "Shelf",
 		parent = shopFolder,
-		size = Vector3.new(13.4, 0.28, 5.2),
-		cf = shopCf * CFrame.new(0, 3.5, -1.2) * CFrame.Angles(math.rad(-12), 0, 0),
-		color = Color3.fromRGB(78, 132, 84),
+		size = Vector3.new(10.4, 0.24, 1.4),
+		cf = shopCf * CFrame.new(0, 0.55, 1.35),
+		color = Color3.fromRGB(132, 92, 54),
+		material = Enum.Material.WoodPlanks,
+	})
+	part({
+		name = "Loaf",
+		parent = shopFolder,
+		shape = Enum.PartType.Ball,
+		size = Vector3.new(1.15, 0.7, 0.75),
+		cf = shopCf * CFrame.new(-3.4, 1.05, 1.35),
+		color = Color3.fromRGB(214, 176, 112),
+		material = Enum.Material.SmoothPlastic,
+		collide = false,
+		query = false,
+	})
+	part({
+		name = "Jacket",
+		parent = shopFolder,
+		size = Vector3.new(1.35, 0.4, 0.95),
+		cf = shopCf * CFrame.new(-1.2, 0.9, 1.35),
+		color = Color3.fromRGB(78, 112, 156),
 		material = Enum.Material.Fabric,
+		collide = false,
+		query = false,
+	})
+	part({
+		name = "Whistle",
+		parent = shopFolder,
+		shape = Enum.PartType.Ball,
+		size = Vector3.new(0.42, 0.42, 0.42),
+		cf = shopCf * CFrame.new(1.15, 0.85, 1.35),
+		color = Color3.fromRGB(196, 198, 202),
+		material = Enum.Material.Metal,
+		collide = false,
+		query = false,
+	})
+	part({
+		name = "Bottle",
+		parent = shopFolder,
+		shape = Enum.PartType.Cylinder,
+		size = Vector3.new(1.25, 0.42, 0.42),
+		cf = shopCf * CFrame.new(3.3, 1.15, 1.35) * CFrame.Angles(0, 0, math.rad(90)),
+		color = Color3.fromRGB(86, 196, 112),
+		material = Enum.Material.Glass,
+		transparency = 0.15,
 		collide = false,
 		query = false,
 	})
 	part({
 		name = "Crate",
 		parent = shopFolder,
-		size = Vector3.new(2.4, 2.4, 2.4),
-		cf = shopCf * CFrame.new(-4.2, -0.8, -2.6),
+		size = Vector3.new(2.2, 2.2, 2.2),
+		cf = shopCf * CFrame.new(-5.2, -1.05, -2.4),
 		color = Color3.fromRGB(148, 102, 60),
 		material = Enum.Material.WoodPlanks,
 	})
 	part({
 		name = "Crate",
 		parent = shopFolder,
-		size = Vector3.new(1.8, 1.8, 1.8),
-		cf = shopCf * CFrame.new(4.4, -1.05, -2.4),
+		size = Vector3.new(1.6, 1.6, 1.6),
+		cf = shopCf * CFrame.new(-5.1, 0.85, -2.5),
 		color = Color3.fromRGB(136, 94, 56),
 		material = Enum.Material.WoodPlanks,
 	})
-	local sign = Instance.new("BillboardGui")
-	sign.Size = UDim2.fromOffset(220, 110)
-	sign.StudsOffset = Vector3.new(0, 5.2, 0)
-	sign.AlwaysOnTop = false
-	sign.Parent = counter
-	local signText = Instance.new("TextLabel")
-	signText.Size = UDim2.fromScale(1, 1)
-	signText.BackgroundColor3 = Color3.fromRGB(46, 68, 44)
-	signText.BackgroundTransparency = 0.1
-	signText.TextColor3 = Color3.fromRGB(244, 236, 214)
-	signText.Font = Enum.Font.GothamMedium
-	signText.TextSize = 16
-	signText.Text = "Лавка\nБатон 250\nКуртка 500   1\nСвисток 350   2\nЭнергетик 200   3"
-	signText.Parent = sign
+	part({
+		name = "Barrel",
+		parent = shopFolder,
+		shape = Enum.PartType.Cylinder,
+		size = Vector3.new(2.3, 1.7, 1.7),
+		cf = shopCf * CFrame.new(5.3, -0.95, -2.2) * CFrame.Angles(0, 0, math.rad(90)),
+		color = Color3.fromRGB(124, 78, 46),
+		material = Enum.Material.Wood,
+	})
+	part({
+		name = "Lantern",
+		parent = shopFolder,
+		shape = Enum.PartType.Ball,
+		size = Vector3.new(0.75, 0.75, 0.75),
+		cf = shopCf * CFrame.new(-6.4, 4.35, -3.6),
+		color = Color3.fromRGB(255, 196, 96),
+		material = Enum.Material.Neon,
+		collide = false,
+		query = false,
+	})
+	local function stallLabel(host, text, textSize)
+		local surface = Instance.new("SurfaceGui")
+		surface.Face = Enum.NormalId.Front
+		surface.CanvasSize = Vector2.new(400, 160)
+		surface.LightInfluence = 0
+		surface.Parent = host
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.TextColor3 = Color3.fromRGB(244, 236, 214)
+		label.Font = Enum.Font.GothamBold
+		label.TextSize = textSize
+		label.TextWrapped = true
+		label.Text = text
+		label.Parent = surface
+	end
+	local signBoard = part({
+		name = "Sign",
+		parent = shopFolder,
+		size = Vector3.new(7.2, 1.8, 0.22),
+		cf = shopCf * CFrame.new(0, 3.7, -3.55),
+		color = Color3.fromRGB(46, 68, 44),
+		material = Enum.Material.Wood,
+		collide = false,
+	})
+	stallLabel(signBoard, "ЛАВКА", 64)
+	local priceBoard = part({
+		name = "PriceBoard",
+		parent = shopFolder,
+		size = Vector3.new(6.4, 2.4, 0.16),
+		cf = shopCf * CFrame.new(0, 0.15, -1.55),
+		color = Color3.fromRGB(58, 42, 30),
+		material = Enum.Material.Wood,
+		collide = false,
+	})
+	stallLabel(priceBoard, "Батон 250\nКуртка 500\nСвисток 350\nЭнергетик 200", 28)
+	counter.Name = "Counter"
 
 	local marker = part({
 		name = "Title",
@@ -708,6 +879,97 @@ local function burst(position, color, size, life)
 	blob.Color = color
 	blob.Parent = fxFolder
 	Debris:AddItem(blob, life or 0.25)
+end
+
+local ANIM_ID = {
+	slash = "rbxassetid://522635514",
+	lunge = "rbxassetid://522638767",
+	point = "rbxassetid://507770453",
+	cheer = "rbxassetid://507770677",
+	wave = "rbxassetid://507770239",
+}
+
+local SOUND_ID = {
+	slash = "rbxasset://sounds/swordslash.wav",
+	lunge = "rbxasset://sounds/swordlunge.wav",
+	magic = "rbxasset://sounds/electronicpingshort.wav",
+	snap = "rbxasset://sounds/snap.wav",
+	water = "rbxasset://sounds/impact_water.mp3",
+	button = "rbxasset://sounds/button.wav",
+	switch = "rbxasset://sounds/switch.wav",
+	bass = "rbxasset://sounds/bass.wav",
+	rocket = "rbxasset://sounds/Rocket shot.wav",
+	glass = "rbxasset://sounds/glassbreak.wav",
+	splat = "rbxasset://sounds/splat.wav",
+}
+
+local liveTrack = setmetatable({}, { __mode = "k" })
+
+local function playAnim(model, kind, speed)
+	local id = ANIM_ID[kind]
+	local humanoid = model and model:FindFirstChildOfClass("Humanoid")
+	if not id or not humanoid or not model:FindFirstChild("UpperTorso") then
+		return
+	end
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		animator = Instance.new("Animator")
+		animator.Parent = humanoid
+	end
+	local previous = liveTrack[model]
+	if previous then
+		pcall(function()
+			previous:Stop(0.05)
+		end)
+	end
+	local ok, track = pcall(function()
+		local anim = Instance.new("Animation")
+		anim.AnimationId = id
+		local loaded = animator:LoadAnimation(anim)
+		anim:Destroy()
+		return loaded
+	end)
+	if not ok or not track then
+		return
+	end
+	liveTrack[model] = track
+	track.Priority = Enum.AnimationPriority.Action
+	track:Play(0.05, 1, speed or 1)
+end
+
+local function sfx(position, name, volume, pitch)
+	local id = SOUND_ID[name]
+	if not id or typeof(position) ~= "Vector3" then
+		return
+	end
+	local host = Instance.new("Part")
+	host.Name = "Sfx"
+	host.Anchored = true
+	host.CanCollide = false
+	host.CanQuery = false
+	host.Transparency = 1
+	host.Size = Vector3.new(0.2, 0.2, 0.2)
+	host.CFrame = CFrame.new(position)
+	host.Parent = fxFolder
+	local sound = Instance.new("Sound")
+	sound.SoundId = id
+	sound.Volume = volume or 0.55
+	sound.PlaybackSpeed = pitch or 1
+	sound.RollOffMaxDistance = 140
+	sound.Parent = host
+	sound:Play()
+	Debris:AddItem(host, 4)
+end
+
+local function cue(entry, animKind, soundName, pitch, speed)
+	if not entry or not entry.model then
+		return
+	end
+	local pos = posOfModel(entry.model)
+	if pos then
+		sfx(pos, soundName, 0.6, pitch)
+	end
+	playAnim(entry.model, animKind, speed)
 end
 
 local function beamVisual(a, b, color, life)
@@ -1065,6 +1327,8 @@ tapCreature = function(player)
 	st.gold += 80
 	burst(creature.PrimaryPart.Position, Color3.fromRGB(255, 190, 80), 3, 0.2)
 	floatText(creature.PrimaryPart.Position, "+80", Color3.fromRGB(255, 210, 90))
+	sfx(creature.PrimaryPart.Position, "splat", 0.5, 1.25)
+	playAnim(character, "cheer", 1)
 end
 
 local function nearestEnemy(entry, reach)
@@ -1310,6 +1574,16 @@ castQ = function(entry, aim, replay)
 		st.cd.q = 0
 		st.castCount = math.max(0, st.castCount - 1)
 		st.castBoost = false
+	elseif ok then
+		if st.fighter == "dictor" then
+			cue(entry, "point", "magic", 1.15, 1)
+		elseif st.fighter == "tumba" then
+			cue(entry, "cheer", "bass", 0.8, 0.9)
+		elseif st.fighter == "otrazhatel" then
+			cue(entry, "wave", "glass", 1.1, 1)
+		elseif st.fighter == "dvornik" then
+			cue(entry, "slash", "snap", 1, 1.1)
+		end
 	end
 end
 
@@ -1406,6 +1680,15 @@ castE = function(entry, aim, replay)
 	elseif st.fighter == "dvornik" then
 		castDvornikE(entry, replayMul)
 	end
+	if st.fighter == "dictor" then
+		cue(entry, "wave", "magic", 0.9, 1)
+	elseif st.fighter == "tumba" then
+		cue(entry, "lunge", "lunge", 1, 1.15)
+	elseif st.fighter == "otrazhatel" then
+		cue(entry, "lunge", "lunge", 1.05, 1.1)
+	elseif st.fighter == "dvornik" then
+		cue(entry, "wave", "water", 1, 1)
+	end
 end
 
 local function castR(entry, aim)
@@ -1418,6 +1701,15 @@ local function castR(entry, aim)
 	local root = rootPart(entry.model)
 	if not root then
 		return
+	end
+	if st.fighter == "dictor" then
+		cue(entry, "point", "rocket", 0.85, 0.9)
+	elseif st.fighter == "dvornik" then
+		cue(entry, "point", "water", 0.95, 1)
+	elseif st.fighter == "tumba" then
+		cue(entry, "cheer", "bass", 0.7, 1)
+	else
+		cue(entry, "wave", "snap", 1.25, 1.1)
 	end
 	if st.fighter == "dictor" or st.fighter == "dvornik" then
 		local flat = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
@@ -1516,6 +1808,11 @@ local function attack(entry, aim)
 	st.mana -= manaCost
 	breakInvis(st)
 	face(entry, aim)
+	if info.ranged then
+		cue(entry, "point", "rocket", 1.25, 1.4)
+	else
+		cue(entry, "slash", "slash", 1, 1.55)
+	end
 	local levelMul = 1 + (st.level - 1) * 0.08
 	if st.fighter == "dvornik" and countOwnTurrets(entry.player) > 0 then
 		levelMul *= 1.15
@@ -1574,6 +1871,9 @@ local function useJacket(st)
 		burst(pos, Color3.fromRGB(230, 230, 240), 5, 0.25)
 		floatText(pos, "куртка", Color3.fromRGB(230, 230, 240))
 	end
+	if entry then
+		cue(entry, "wave", "glass", 0.95, 1)
+	end
 end
 
 local function useWhistle(st)
@@ -1583,6 +1883,11 @@ local function useWhistle(st)
 	end
 	st.cd.whistle = now + 18
 	st.whistleAt = now + 0.4
+	local player = st.ownerPlayer
+	local entry = player and entryOfPlayer(player)
+	if entry then
+		cue(entry, "point", "switch", 1.35, 1.2)
+	end
 end
 
 local function useEnergy(st)
@@ -1594,6 +1899,11 @@ local function useEnergy(st)
 	st.mana = math.min(st.maxMana, st.mana + 80)
 	st.energyUntil = now + 3
 	breakInvis(st)
+	local player = st.ownerPlayer
+	local entry = player and entryOfPlayer(player)
+	if entry then
+		cue(entry, "cheer", "magic", 1.2, 1)
+	end
 end
 
 local function buy(player, itemId)
@@ -1610,6 +1920,8 @@ local function buy(player, itemId)
 	st.gold -= spec.price
 	st.items[itemId] = true
 	floatText(root.Position, spec.name, Color3.fromRGB(240, 210, 140))
+	sfx(root.Position, "button", 0.55, 1)
+	playAnim(character, "cheer", 1)
 end
 
 local function validAim(aim, origin)
@@ -2418,7 +2730,7 @@ end)
     <Item class="LocalScript" referent="6">
       <Properties>
         <string name="Name">YamaClient</string>
-        <ProtectedString name="Source"><![CDATA[-- Парк. LocalScript в StarterPlayerScripts. Камера, прицел и кнопки.
+        <ProtectedString name="Source"><![CDATA[-- Парк. LocalScript в StarterPlayerScripts. Шифтлок, камера и интерфейс.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -2429,17 +2741,18 @@ local pickRemote = ReplicatedStorage:WaitForChild("YamaPick")
 local actionRemote = ReplicatedStorage:WaitForChild("YamaAction")
 local stateRemote = ReplicatedStorage:WaitForChild("YamaState")
 
-local INK = Color3.fromRGB(28, 38, 26)
-local CREAM = Color3.fromRGB(246, 241, 228)
-local MOSS = Color3.fromRGB(58, 92, 56)
-local PAPER = Color3.fromRGB(255, 250, 240)
-local DOCK = Color3.fromRGB(24, 32, 24)
+local INK = Color3.fromRGB(236, 232, 214)
+local PANEL = Color3.fromRGB(16, 24, 18)
+local MOSS = Color3.fromRGB(88, 140, 74)
+local PAPER = Color3.fromRGB(248, 244, 232)
+local GOLD = Color3.fromRGB(224, 176, 78)
+local MUTED = Color3.fromRGB(176, 186, 162)
 
 local CHOICES = {
-	{ id = "dictor", name = "Диктор", line = "Реплика, пауза и луч", color = Color3.fromRGB(86, 138, 186) },
-	{ id = "tumba", name = "Тумба", line = "Врастает, баш на удар", color = Color3.fromRGB(176, 112, 72) },
-	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа» и толчок", color = Color3.fromRGB(196, 164, 72) },
-	{ id = "dvornik", name = "Дворник", line = "Тумбы, полив, струя", color = Color3.fromRGB(78, 146, 96) },
+	{ id = "dictor", name = "Диктор", line = "Реплика, пауза и луч", color = Color3.fromRGB(86, 148, 204) },
+	{ id = "tumba", name = "Тумба", line = "Врастает и бьёт башем", color = Color3.fromRGB(196, 122, 72) },
+	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа» и толчок", color = Color3.fromRGB(214, 176, 72) },
+	{ id = "dvornik", name = "Дворник", line = "Тумбы, полив, струя", color = Color3.fromRGB(78, 158, 96) },
 }
 
 local KEYS = {
@@ -2452,6 +2765,23 @@ local KEYS = {
 	[Enum.KeyCode.F] = "tap",
 }
 
+local NAMES = {
+	dictor = { "Реплика", "Пауза", "Эфир" },
+	tumba = { "Врос", "Отскок", "Баш" },
+	otrazhatel = { "Опа", "Толчок", "Эхо" },
+	dvornik = { "Кадка", "Лейка", "Шланг" },
+}
+local DISPLAY = {
+	dictor = "Диктор",
+	tumba = "Тумба",
+	otrazhatel = "Отражатель",
+	dvornik = "Дворник",
+}
+local FIGHTER_COLOR = {}
+for _, choice in CHOICES do
+	FIGHTER_COLOR[choice.id] = choice.color
+end
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "Yama"
 gui.ResetOnSpawn = false
@@ -2460,14 +2790,14 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 local function corner(parent, radius)
 	local ui = Instance.new("UICorner")
-	ui.CornerRadius = UDim.new(0, radius or 10)
+	ui.CornerRadius = UDim.new(0, radius or 12)
 	ui.Parent = parent
 end
 
 local function stroke(parent, color, thickness)
 	local line = Instance.new("UIStroke")
 	line.Color = color or MOSS
-	line.Thickness = thickness or 1.5
+	line.Thickness = thickness or 1
 	line.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	line.Parent = parent
 end
@@ -2490,90 +2820,105 @@ local function panel(size, pos)
 	local frame = Instance.new("Frame")
 	frame.Size = size
 	frame.Position = pos
-	frame.BackgroundColor3 = CREAM
-	frame.BackgroundTransparency = 0.04
+	frame.BackgroundColor3 = PANEL
+	frame.BackgroundTransparency = 0.12
 	frame.BorderSizePixel = 0
 	frame.Parent = gui
-	corner(frame, 14)
-	stroke(frame, MOSS, 1.5)
-	local bar = Instance.new("Frame")
-	bar.Size = UDim2.new(1, 0, 0, 4)
-	bar.BackgroundColor3 = MOSS
-	bar.BorderSizePixel = 0
-	bar.Parent = frame
-	corner(bar, 4)
+	corner(frame, 16)
+	stroke(frame, Color3.fromRGB(168, 190, 150), 1)
 	return frame
 end
 
-local banner = panel(UDim2.fromOffset(420, 58), UDim2.new(0.5, -210, 0, 14))
-local status = label(banner, UDim2.new(1, -24, 0, 22), UDim2.fromOffset(12, 8), "Выбери бойца", 16)
+local banner = panel(UDim2.fromOffset(460, 64), UDim2.new(0.5, -230, 0, 16))
+local status = label(banner, UDim2.new(1, -28, 0, 22), UDim2.fromOffset(14, 8), "Выбери бойца", 16)
 status.Font = Enum.Font.GothamBold
 status.TextXAlignment = Enum.TextXAlignment.Center
-local timer = label(banner, UDim2.new(1, -24, 0, 20), UDim2.fromOffset(12, 30), "", 18)
+local timer = label(banner, UDim2.new(1, -28, 0, 26), UDim2.fromOffset(14, 30), "", 22)
 timer.Font = Enum.Font.GothamBold
 timer.TextXAlignment = Enum.TextXAlignment.Center
-timer.TextColor3 = Color3.fromRGB(92, 72, 36)
+timer.TextColor3 = GOLD
 
-local card = panel(UDim2.fromOffset(248, 168), UDim2.fromOffset(16, 86))
-local nameLabel = label(card, UDim2.new(1, -20, 0, 22), UDim2.fromOffset(12, 12), "Боец", 18)
+local card = panel(UDim2.fromOffset(272, 196), UDim2.fromOffset(18, 96))
+local accent = Instance.new("Frame")
+accent.Size = UDim2.new(0, 6, 1, -20)
+accent.Position = UDim2.fromOffset(10, 10)
+accent.BackgroundColor3 = MOSS
+accent.BorderSizePixel = 0
+accent.Parent = card
+corner(accent, 4)
+local nameLabel = label(card, UDim2.new(1, -36, 0, 24), UDim2.fromOffset(24, 10), "Боец", 20)
 nameLabel.Font = Enum.Font.GothamBold
-local levelLabel = label(card, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 34), "", 13)
-levelLabel.TextColor3 = Color3.fromRGB(78, 92, 70)
+local levelLabel = label(card, UDim2.new(1, -36, 0, 16), UDim2.fromOffset(24, 34), "выбери карточку", 13)
+levelLabel.TextColor3 = MUTED
+local xpBack = Instance.new("Frame")
+xpBack.Size = UDim2.new(1, -40, 0, 4)
+xpBack.Position = UDim2.fromOffset(24, 54)
+xpBack.BackgroundColor3 = Color3.fromRGB(48, 58, 44)
+xpBack.BorderSizePixel = 0
+xpBack.Parent = card
+corner(xpBack, 3)
+local xpFill = Instance.new("Frame")
+xpFill.Size = UDim2.fromScale(0, 1)
+xpFill.BackgroundColor3 = GOLD
+xpFill.BorderSizePixel = 0
+xpFill.Parent = xpBack
+corner(xpFill, 3)
 
-local function bar(parent, y, caption, backColor, fillColor)
-	local captionLabel = label(parent, UDim2.new(1, -24, 0, 14), UDim2.fromOffset(12, y), caption, 12)
-	captionLabel.TextColor3 = Color3.fromRGB(78, 92, 70)
+local function meter(parent, y, fillColor)
 	local back = Instance.new("Frame")
-	back.Size = UDim2.new(1, -24, 0, 10)
-	back.Position = UDim2.fromOffset(12, y + 16)
-	back.BackgroundColor3 = backColor
+	back.Size = UDim2.new(1, -40, 0, 18)
+	back.Position = UDim2.fromOffset(24, y)
+	back.BackgroundColor3 = Color3.fromRGB(38, 46, 36)
 	back.BorderSizePixel = 0
 	back.Parent = parent
-	corner(back, 5)
+	corner(back, 6)
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.fromScale(1, 1)
 	fill.BackgroundColor3 = fillColor
 	fill.BorderSizePixel = 0
 	fill.Parent = back
-	corner(fill, 5)
-	return fill, captionLabel
+	corner(fill, 6)
+	local value = label(back, UDim2.fromScale(1, 1), UDim2.fromOffset(0, 0), "", 12)
+	value.Font = Enum.Font.GothamBold
+	value.TextXAlignment = Enum.TextXAlignment.Center
+	value.TextColor3 = PAPER
+	value.TextStrokeTransparency = 0.45
+	value.TextStrokeColor3 = Color3.fromRGB(12, 16, 12)
+	return fill, value
 end
 
-local hpFill, hpText = bar(card, 54, "жизнь", Color3.fromRGB(214, 176, 168), Color3.fromRGB(186, 78, 68))
-local manaFill, manaText = bar(card, 84, "мана", Color3.fromRGB(176, 196, 206), Color3.fromRGB(72, 132, 164))
-local goldLabel = label(card, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 116), "0 золота", 14)
-goldLabel.TextColor3 = Color3.fromRGB(128, 88, 36)
-local killLabel = label(card, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 136), "0 убийств", 14)
+local hpFill, hpText = meter(card, 68, Color3.fromRGB(186, 72, 64))
+local manaFill, manaText = meter(card, 94, Color3.fromRGB(64, 132, 176))
+local goldLabel = label(card, UDim2.new(1, -36, 0, 18), UDim2.fromOffset(24, 124), "0 золота", 14)
+goldLabel.TextColor3 = GOLD
+local killLabel = label(card, UDim2.new(1, -36, 0, 18), UDim2.fromOffset(24, 146), "0 убийств", 14)
+local stateLabel = label(card, UDim2.new(1, -36, 0, 16), UDim2.fromOffset(24, 168), "", 13)
+stateLabel.TextColor3 = MUTED
 
-local board = panel(UDim2.fromOffset(248, 188), UDim2.new(1, -264, 0, 86))
-local boardTitle = label(board, UDim2.new(1, -20, 0, 20), UDim2.fromOffset(12, 12), "Счёт", 16)
+local board = panel(UDim2.fromOffset(272, 214), UDim2.new(1, -290, 0, 96))
+local boardTitle = label(board, UDim2.new(1, -24, 0, 22), UDim2.fromOffset(14, 10), "Счёт", 16)
 boardTitle.Font = Enum.Font.GothamBold
 local boardRows = {}
 for index = 1, 8 do
-	boardRows[index] = label(board, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 36 + (index - 1) * 18), "", 13)
+	local row = label(board, UDim2.new(1, -24, 0, 18), UDim2.fromOffset(14, 38 + (index - 1) * 21), "", 14)
+	row.Font = Enum.Font.GothamMedium
+	boardRows[index] = row
 end
 
-local dock = Instance.new("Frame")
-dock.Size = UDim2.fromOffset(520, 96)
-dock.Position = UDim2.new(0.5, -260, 1, -112)
-dock.BackgroundColor3 = DOCK
+local dock = panel(UDim2.fromOffset(640, 168), UDim2.new(0.5, -320, 1, -186))
 dock.BackgroundTransparency = 0.08
-dock.BorderSizePixel = 0
-dock.Parent = gui
-corner(dock, 16)
-stroke(dock, Color3.fromRGB(168, 186, 150), 1.25)
 
-local function abilityBox(x, keyName, titleText)
+local function abilityBox(x, keyName)
 	local box = Instance.new("Frame")
-	box.Size = UDim2.fromOffset(150, 52)
-	box.Position = UDim2.fromOffset(x, 8)
-	box.BackgroundColor3 = PAPER
+	box.Size = UDim2.fromOffset(196, 78)
+	box.Position = UDim2.fromOffset(x, 12)
+	box.BackgroundColor3 = Color3.fromRGB(28, 36, 28)
 	box.BorderSizePixel = 0
 	box.Parent = dock
-	corner(box, 10)
+	corner(box, 12)
 	local badge = Instance.new("TextLabel")
-	badge.Size = UDim2.fromOffset(26, 22)
-	badge.Position = UDim2.fromOffset(8, 6)
+	badge.Size = UDim2.fromOffset(28, 22)
+	badge.Position = UDim2.fromOffset(10, 10)
 	badge.BackgroundColor3 = MOSS
 	badge.TextColor3 = PAPER
 	badge.Font = Enum.Font.GothamBold
@@ -2581,113 +2926,144 @@ local function abilityBox(x, keyName, titleText)
 	badge.Text = keyName
 	badge.Parent = box
 	corner(badge, 6)
-	local title = label(box, UDim2.new(1, -48, 0, 20), UDim2.fromOffset(40, 6), titleText, 15)
+	local title = label(box, UDim2.new(1, -56, 0, 22), UDim2.fromOffset(46, 10), keyName, 16)
 	title.Font = Enum.Font.GothamBold
-	local cd = label(box, UDim2.new(1, -48, 0, 16), UDim2.fromOffset(40, 28), "", 13)
-	cd.TextColor3 = Color3.fromRGB(96, 78, 42)
+	local cd = label(box, UDim2.new(1, -20, 0, 28), UDim2.fromOffset(12, 40), "", 18)
+	cd.Font = Enum.Font.GothamBold
+	cd.TextColor3 = GOLD
 	return { frame = box, title = title, cd = cd }
 end
 
 local boxes = {
-	q = abilityBox(14, "Q", "Реплика"),
-	e = abilityBox(176, "E", "Пауза"),
-	r = abilityBox(338, "R", "Эфир"),
+	q = abilityBox(14, "Q"),
+	e = abilityBox(222, "E"),
+	r = abilityBox(430, "R"),
 }
 
-local help = label(dock, UDim2.new(1, -16, 0, 18), UDim2.fromOffset(8, 66), "ЛКМ удар     Q E R способности     1 куртка    2 свисток    3 энергетик     F хомяк", 13)
+local function itemSlot(x, keyName, titleText)
+	local box = Instance.new("Frame")
+	box.Size = UDim2.fromOffset(146, 36)
+	box.Position = UDim2.fromOffset(x, 98)
+	box.BackgroundColor3 = Color3.fromRGB(28, 36, 28)
+	box.BorderSizePixel = 0
+	box.Parent = dock
+	corner(box, 8)
+	local badge = Instance.new("TextLabel")
+	badge.Size = UDim2.fromOffset(22, 18)
+	badge.Position = UDim2.fromOffset(8, 9)
+	badge.BackgroundColor3 = Color3.fromRGB(64, 78, 58)
+	badge.TextColor3 = PAPER
+	badge.Font = Enum.Font.GothamBold
+	badge.TextSize = 12
+	badge.Text = keyName
+	badge.Parent = box
+	corner(badge, 5)
+	local title = label(box, UDim2.new(1, -92, 0, 36), UDim2.fromOffset(36, 0), titleText, 13)
+	title.Font = Enum.Font.GothamMedium
+	local state = label(box, UDim2.fromOffset(70, 36), UDim2.new(1, -78, 0, 0), "", 12)
+	state.TextXAlignment = Enum.TextXAlignment.Right
+	state.TextColor3 = MUTED
+	return { frame = box, title = title, state = state }
+end
+
+local slots = {
+	jacket = itemSlot(14, "1", "Куртка"),
+	whistle = itemSlot(168, "2", "Свисток"),
+	energy = itemSlot(322, "3", "Энергетик"),
+	tap = itemSlot(476, "F", "Хомяк"),
+}
+
+local help = label(dock, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(10, 140), "ЛКМ удар. Прицел закреплён, пока не открыта лавка или выбор бойца.", 12)
 help.TextXAlignment = Enum.TextXAlignment.Center
-help.TextColor3 = Color3.fromRGB(232, 226, 206)
+help.TextColor3 = MUTED
 
 local cross = Instance.new("Frame")
-cross.Size = UDim2.fromOffset(14, 14)
+cross.Size = UDim2.fromOffset(18, 18)
 cross.AnchorPoint = Vector2.new(0.5, 0.5)
 cross.Position = UDim2.fromScale(0.5, 0.5)
 cross.BackgroundTransparency = 1
 cross.Parent = gui
-stroke(cross, Color3.fromRGB(20, 28, 18), 2)
-corner(cross, 7)
+stroke(cross, PAPER, 1.5)
+corner(cross, 9)
 local crossDot = Instance.new("Frame")
 crossDot.Size = UDim2.fromOffset(4, 4)
 crossDot.AnchorPoint = Vector2.new(0.5, 0.5)
 crossDot.Position = UDim2.fromScale(0.5, 0.5)
-crossDot.BackgroundColor3 = Color3.fromRGB(248, 244, 230)
+crossDot.BackgroundColor3 = Color3.fromRGB(16, 22, 16)
 crossDot.BorderSizePixel = 0
 crossDot.Parent = cross
 corner(crossDot, 2)
 
-local shop = panel(UDim2.fromOffset(248, 196), UDim2.fromOffset(16, 266))
+local shop = panel(UDim2.fromOffset(300, 286), UDim2.new(0, 18, 1, -488))
 shop.Visible = false
-local shopTitle = label(shop, UDim2.new(1, -20, 0, 22), UDim2.fromOffset(12, 12), "Лавка", 18)
+local shopTitle = label(shop, UDim2.new(1, -24, 0, 24), UDim2.fromOffset(14, 12), "Лавка", 20)
 shopTitle.Font = Enum.Font.GothamBold
+local shopHint = label(shop, UDim2.new(1, -24, 0, 16), UDim2.fromOffset(14, 36), "Кнопки у прилавка", 13)
+shopHint.TextColor3 = MUTED
 
 local shopButtons = {}
 local shopItems = {
-	{ id = "baton", name = "Батон  250", y = 42 },
-	{ id = "jacket", name = "Куртка  500", y = 78 },
-	{ id = "whistle", name = "Свисток  350", y = 114 },
-	{ id = "energy", name = "Энергетик  200", y = 150 },
+	{ id = "baton", name = "Батон", line = "Удары чаще, если есть мана", price = "250", y = 62 },
+	{ id = "jacket", name = "Куртка", line = "Клавиша 1, короткая защита", price = "500", y = 116 },
+	{ id = "whistle", name = "Свисток", line = "Клавиша 2, невидимость", price = "350", y = 170 },
+	{ id = "energy", name = "Энергетик", line = "Клавиша 3, мана и скорость", price = "200", y = 224 },
 }
 for _, spec in shopItems do
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, -24, 0, 30)
+	button.Size = UDim2.new(1, -24, 0, 48)
 	button.Position = UDim2.fromOffset(12, spec.y)
-	button.BackgroundColor3 = MOSS
-	button.TextColor3 = PAPER
-	button.Font = Enum.Font.GothamMedium
-	button.TextSize = 14
-	button.Text = spec.name
+	button.BackgroundColor3 = Color3.fromRGB(36, 52, 34)
+	button.Text = ""
 	button.AutoButtonColor = true
 	button.Parent = shop
-	corner(button, 8)
+	corner(button, 10)
+	local name = label(button, UDim2.new(1, -70, 0, 20), UDim2.fromOffset(10, 4), spec.name, 15)
+	name.Font = Enum.Font.GothamBold
+	local line = label(button, UDim2.new(1, -70, 0, 16), UDim2.fromOffset(10, 24), spec.line, 12)
+	line.TextColor3 = MUTED
+	local price = label(button, UDim2.fromOffset(58, 48), UDim2.new(1, -66, 0, 0), spec.price, 14)
+	price.Font = Enum.Font.GothamBold
+	price.TextXAlignment = Enum.TextXAlignment.Right
+	price.TextColor3 = GOLD
 	button.MouseButton1Click:Connect(function()
 		actionRemote:FireServer("buy_" .. spec.id, Vector3.zero)
 	end)
-	shopButtons[spec.id] = button
+	shopButtons[spec.id] = { button = button, price = price, name = name }
 end
 
-local picker = panel(UDim2.fromOffset(660, 236), UDim2.new(0.5, -330, 0.5, -118))
-local pickTitle = label(picker, UDim2.new(1, -24, 0, 26), UDim2.fromOffset(16, 12), "Кто выходит в парк", 22)
+local picker = panel(UDim2.fromOffset(700, 250), UDim2.new(0.5, -350, 0.5, -125))
+local pickTitle = label(picker, UDim2.new(1, -28, 0, 26), UDim2.fromOffset(16, 12), "Кто выходит в парк", 22)
 pickTitle.Font = Enum.Font.GothamBold
+local pickHint = label(picker, UDim2.new(1, -28, 0, 16), UDim2.fromOffset(16, 40), "Мышь свободна, пока открыт этот выбор", 13)
+pickHint.TextColor3 = MUTED
 
 for index, choice in CHOICES do
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.fromOffset(150, 176)
-	button.Position = UDim2.fromOffset(16 + (index - 1) * 162, 48)
-	button.BackgroundColor3 = PAPER
+	button.Size = UDim2.fromOffset(160, 176)
+	button.Position = UDim2.fromOffset(16 + (index - 1) * 172, 64)
+	button.BackgroundColor3 = Color3.fromRGB(28, 38, 28)
 	button.Text = ""
 	button.AutoButtonColor = true
 	button.Parent = picker
 	corner(button, 12)
-	stroke(button, choice.color, 2)
+	stroke(button, choice.color, 1.5)
 	local stripe = Instance.new("Frame")
-	stripe.Size = UDim2.new(1, 0, 0, 8)
+	stripe.Size = UDim2.new(1, -16, 0, 6)
+	stripe.Position = UDim2.fromOffset(8, 10)
 	stripe.BackgroundColor3 = choice.color
 	stripe.BorderSizePixel = 0
 	stripe.Parent = button
-	corner(stripe, 8)
-	local title = label(button, UDim2.new(1, -16, 0, 44), UDim2.fromOffset(10, 24), choice.name, 20)
+	corner(stripe, 4)
+	local title = label(button, UDim2.new(1, -16, 0, 48), UDim2.fromOffset(10, 28), choice.name, 20)
 	title.Font = Enum.Font.GothamBold
 	title.TextWrapped = true
-	local line = label(button, UDim2.new(1, -16, 0, 64), UDim2.fromOffset(10, 78), choice.line, 14)
+	local line = label(button, UDim2.new(1, -16, 0, 64), UDim2.fromOffset(10, 82), choice.line, 14)
 	line.TextWrapped = true
-	line.TextColor3 = Color3.fromRGB(78, 92, 70)
+	line.TextColor3 = MUTED
 	button.MouseButton1Click:Connect(function()
 		pickRemote:FireServer(choice.id)
 	end)
 end
-
-local NAMES = {
-	dictor = { "Реплика", "Пауза", "Эфир" },
-	tumba = { "Врос", "Отскок", "Баш" },
-	otrazhatel = { "Опа", "Толчок", "Эхо" },
-	dvornik = { "Кадка", "Лейка", "Шланг" },
-}
-local DISPLAY = {
-	dictor = "Диктор",
-	tumba = "Тумба",
-	otrazhatel = "Отражатель",
-	dvornik = "Дворник",
-}
 
 local function fmtTime(seconds)
 	seconds = math.max(0, math.floor(seconds + 0.5))
@@ -2705,13 +3081,34 @@ local function paintBox(box, titleText, seconds, locked, lockLabel)
 	box.title.Text = titleText
 	if locked then
 		box.cd.Text = lockLabel
-		box.frame.BackgroundColor3 = Color3.fromRGB(214, 208, 196)
+		box.cd.TextColor3 = MUTED
+		box.frame.BackgroundColor3 = Color3.fromRGB(32, 34, 30)
 	elseif seconds and seconds > 0.05 then
 		box.cd.Text = string.format("%d сек", math.ceil(seconds))
-		box.frame.BackgroundColor3 = Color3.fromRGB(226, 214, 190)
+		box.cd.TextColor3 = GOLD
+		box.frame.BackgroundColor3 = Color3.fromRGB(48, 40, 28)
 	else
 		box.cd.Text = "готово"
-		box.frame.BackgroundColor3 = PAPER
+		box.cd.TextColor3 = Color3.fromRGB(154, 204, 132)
+		box.frame.BackgroundColor3 = Color3.fromRGB(28, 42, 30)
+	end
+end
+
+local function paintSlot(slot, owned, seconds)
+	if not owned then
+		slot.state.Text = "нет"
+		slot.state.TextColor3 = MUTED
+		slot.frame.BackgroundColor3 = Color3.fromRGB(26, 30, 26)
+		return
+	end
+	if seconds and seconds > 0.05 then
+		slot.state.Text = string.format("%d c", math.ceil(seconds))
+		slot.state.TextColor3 = GOLD
+		slot.frame.BackgroundColor3 = Color3.fromRGB(48, 40, 28)
+	else
+		slot.state.Text = "готово"
+		slot.state.TextColor3 = Color3.fromRGB(154, 204, 132)
+		slot.frame.BackgroundColor3 = Color3.fromRGB(28, 42, 30)
 	end
 end
 
@@ -2733,65 +3130,77 @@ local function applyState(packet)
 	dock.Visible = not picker.Visible
 	if you and picked then
 		nameLabel.Text = DISPLAY[you.fighter] or you.fighter
+		accent.BackgroundColor3 = FIGHTER_COLOR[you.fighter] or MOSS
 		local nextXp = you.nextXp or you.xp
 		if you.level >= 6 then
 			levelLabel.Text = "уровень 6"
+			xpFill.Size = UDim2.fromScale(1, 1)
 		else
-			levelLabel.Text = string.format("уровень %d    %d / %d", you.level, you.xp, nextXp)
+			levelLabel.Text = string.format("уровень %d     %d / %d", you.level, you.xp, nextXp)
+			xpFill.Size = UDim2.fromScale(ratio(you.xp, nextXp), 1)
 		end
 		hpFill.Size = UDim2.fromScale(ratio(you.hp, you.maxHp), 1)
 		manaFill.Size = UDim2.fromScale(ratio(you.mana, you.maxMana), 1)
-		hpText.Text = string.format("жизнь  %d", math.floor((you.hp or 0) + 0.5))
-		manaText.Text = string.format("мана  %d", math.floor((you.mana or 0) + 0.5))
+		hpText.Text = string.format("жизнь  %d / %d", you.hp or 0, you.maxHp or 0)
+		manaText.Text = string.format("мана  %d / %d", you.mana or 0, you.maxMana or 0)
 		local extra = ""
 		if you.shield and you.shield > 0 then
-			extra = "    щит " .. you.shield
+			extra ..= "щит " .. you.shield
 		end
 		if you.rooted then
-			extra ..= "    врос"
+			extra ..= (extra ~= "" and "   " or "") .. "врос"
 		end
-		goldLabel.Text = tostring(you.gold) .. " золота" .. extra
-		killLabel.Text = tostring(you.kills) .. " убийств    смертей " .. tostring(you.deaths)
+		if you.items and you.items.baton then
+			extra ..= (extra ~= "" and "   " or "") .. "батон"
+		end
+		stateLabel.Text = extra
+		goldLabel.Text = tostring(you.gold) .. " золота"
+		killLabel.Text = tostring(you.kills) .. " убийств     смертей " .. tostring(you.deaths)
 		local names = NAMES[you.fighter] or { "Q", "E", "R" }
 		paintBox(boxes.q, names[1], you.cd.q, false, "")
 		paintBox(boxes.e, names[2], you.cd.e, you.lockE, "со 2 уровня")
 		paintBox(boxes.r, names[3], you.cd.r, you.lockR, "с 4 уровня")
+		paintSlot(slots.jacket, you.items and you.items.jacket, you.cd.jacket)
+		paintSlot(slots.whistle, you.items and you.items.whistle, you.cd.whistle)
+		paintSlot(slots.energy, you.items and you.items.energy, you.cd.energy)
+		slots.tap.state.Text = "жми"
+		slots.tap.state.TextColor3 = GOLD
 		shop.Visible = you.nearShop == true and packet.phase == "fight" and not picker.Visible
-		local ownedText = {
-			baton = "Батон есть",
-			jacket = "Куртка есть",
-			whistle = "Свисток есть",
-			energy = "Энергетик есть",
-		}
-		local priceText = {
-			baton = "Батон  250",
-			jacket = "Куртка  500",
-			whistle = "Свисток  350",
-			energy = "Энергетик  200",
-		}
-		for id, button in shopButtons do
+		for id, widget in shopButtons do
 			local owned = you.items and you.items[id]
-			button.Text = owned and ownedText[id] or priceText[id]
-			button.BackgroundColor3 = owned and Color3.fromRGB(120, 132, 112) or MOSS
-			button.AutoButtonColor = not owned
+			widget.price.Text = owned and "есть" or widget.price.Text
+			if not owned then
+				for _, spec in shopItems do
+					if spec.id == id then
+						widget.price.Text = spec.price
+					end
+				end
+			end
+			widget.button.AutoButtonColor = not owned
+			widget.button.BackgroundColor3 = owned and Color3.fromRGB(48, 56, 46) or Color3.fromRGB(36, 52, 34)
 		end
 	else
 		nameLabel.Text = "Боец не выбран"
+		accent.BackgroundColor3 = MOSS
 		levelLabel.Text = "выбери карточку"
 		goldLabel.Text = ""
 		killLabel.Text = ""
+		stateLabel.Text = ""
 		hpText.Text = "жизнь"
 		manaText.Text = "мана"
 		hpFill.Size = UDim2.fromScale(0, 1)
 		manaFill.Size = UDim2.fromScale(0, 1)
+		xpFill.Size = UDim2.fromScale(0, 1)
 		shop.Visible = false
 	end
 	for index = 1, 8 do
 		local row = packet.board and packet.board[index]
+		local line = boardRows[index]
 		if row then
-			boardRows[index].Text = string.format("%d    %s    %s", row.kills or 0, row.fighter or "", row.name or "")
+			line.Text = string.format("%d     %s     %s", row.kills or 0, row.fighter or "", row.name or "")
+			line.TextColor3 = (row.name == player.DisplayName) and GOLD or INK
 		else
-			boardRows[index].Text = ""
+			line.Text = ""
 		end
 	end
 end
@@ -2802,8 +3211,7 @@ local function aimPoint()
 	local ray = camera:ViewportPointToRay(viewport.X / 2, viewport.Y / 2)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	local ignore = { player.Character, workspace:FindFirstChild("YamaFx") }
-	params.FilterDescendantsInstances = ignore
+	params.FilterDescendantsInstances = { player.Character, workspace:FindFirstChild("YamaFx") }
 	local hit = workspace:Raycast(ray.Origin, ray.Direction * 300, params)
 	if hit then
 		return hit.Position
@@ -2816,9 +3224,10 @@ local function bindCamera(character)
 	if not humanoid then
 		return
 	end
-	humanoid.CameraOffset = Vector3.new(2.2, 1.6, 0)
-	player.CameraMinZoomDistance = 14
-	player.CameraMaxZoomDistance = 32
+	humanoid.CameraOffset = Vector3.new(1.75, 0.35, 0)
+	humanoid.AutoRotate = false
+	player.CameraMinZoomDistance = 10
+	player.CameraMaxZoomDistance = 16
 	local camera = workspace.CurrentCamera
 	camera.CameraSubject = humanoid
 	camera.CameraType = Enum.CameraType.Custom
@@ -2851,6 +3260,33 @@ UserInputService.InputBegan:Connect(function(input, processed)
 end)
 
 stateRemote.OnClientEvent:Connect(applyState)
+
+RunService:BindToRenderStep("YamaShiftLock", Enum.RenderPriority.Camera.Value + 1, function()
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local camera = workspace.CurrentCamera
+	local menu = picker.Visible or shop.Visible
+	if menu or not humanoid or not root or humanoid.Health <= 0 then
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		UserInputService.MouseIconEnabled = true
+		cross.Visible = false
+		if humanoid then
+			humanoid.AutoRotate = true
+		end
+		return
+	end
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+	UserInputService.MouseIconEnabled = false
+	humanoid.AutoRotate = false
+	humanoid.CameraOffset = Vector3.new(1.75, 0.35, 0)
+	cross.Visible = true
+	local look = camera.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude > 0.05 then
+		root.CFrame = CFrame.new(root.Position, root.Position + flat)
+	end
+end)
 
 RunService.RenderStepped:Connect(function()
 	for _, other in Players:GetPlayers() do
