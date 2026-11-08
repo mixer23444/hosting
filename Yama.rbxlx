@@ -424,6 +424,64 @@ local function buildWorld()
 		end
 	end
 
+	for n = 1, 24 do
+		local angle = (n / 24) * math.pi * 2
+		local pos = Vector3.new(math.cos(angle) * 176, 1.7, math.sin(angle) * 176)
+		local cf = CFrame.lookAt(pos, Vector3.new(0, 1.7, 0))
+		part({
+			name = "Curb",
+			parent = props,
+			size = Vector3.new(18, 0.45, 1.1),
+			cf = cf,
+			color = Color3.fromRGB(150, 146, 138),
+			material = Enum.Material.Slate,
+		})
+		if n % 4 == 0 then
+			part({
+				name = "Post",
+				parent = props,
+				size = Vector3.new(0.35, 4.2, 0.35),
+				cf = cf * CFrame.new(0, 2.2, 0),
+				color = Color3.fromRGB(92, 64, 40),
+				material = Enum.Material.Wood,
+			})
+			part({
+				name = "Lantern",
+				parent = props,
+				shape = Enum.PartType.Ball,
+				size = Vector3.new(0.7, 0.7, 0.7),
+				cf = cf * CFrame.new(0, 4.3, 0),
+				color = Color3.fromRGB(255, 196, 110),
+				material = Enum.Material.Neon,
+				collide = false,
+				query = false,
+			})
+		end
+		if n % 3 == 0 then
+			part({
+				name = "Tuft",
+				parent = props,
+				size = Vector3.new(1.4, 0.7, 1.4),
+				cf = cf * CFrame.new(2.2, 0.2, 1.6),
+				color = Color3.fromRGB(78, 132, 62),
+				material = Enum.Material.Grass,
+				collide = false,
+				query = false,
+			})
+			part({
+				name = "Bloom",
+				parent = props,
+				shape = Enum.PartType.Ball,
+				size = Vector3.new(0.45, 0.45, 0.45),
+				cf = cf * CFrame.new(2.4, 0.7, 1.6),
+				color = (n % 2 == 0) and Color3.fromRGB(220, 90, 96) or Color3.fromRGB(240, 200, 90),
+				material = Enum.Material.SmoothPlastic,
+				collide = false,
+				query = false,
+			})
+		end
+	end
+
 	for n = 1, 28 do
 		local angle = (n / 28) * math.pi * 2
 		local radius = 168 + (n % 3) * 4
@@ -879,7 +937,96 @@ local function teleport(character, cf)
 	root.CFrame = cf
 end
 
-local function paint(character, color, title, hp, maxHp)
+local function dress(character, style)
+	local old = character:FindFirstChild("YamaSkin")
+	if old then
+		old:Destroy()
+	end
+	if not style then
+		return
+	end
+	local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
+	local head = character:FindFirstChild("Head")
+	if not torso then
+		return
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = "YamaSkin"
+	folder.Parent = character
+	local function bit(anchor, offset, size, color, material, shape, name)
+		local piece = Instance.new("Part")
+		piece.Name = name or "Bit"
+		piece.Size = size
+		piece.Color = color
+		piece.Material = material or Enum.Material.SmoothPlastic
+		piece.CanCollide = false
+		piece.CanQuery = false
+		piece.Massless = true
+		piece.Anchored = false
+		if shape then
+			piece.Shape = shape
+		end
+		piece.Parent = folder
+		local weld = Instance.new("Weld")
+		weld.Part0 = anchor
+		weld.Part1 = piece
+		weld.C0 = offset
+		weld.Parent = piece
+		return piece
+	end
+	local function tint(name, color)
+		local piece = character:FindFirstChild(name)
+		if piece and piece:IsA("BasePart") then
+			piece.Color = color
+		end
+	end
+	local skin = Color3.fromRGB(214, 176, 148)
+	tint("Head", skin)
+	if style == "dictor" then
+		tint("UpperTorso", Color3.fromRGB(48, 92, 168))
+		tint("Torso", Color3.fromRGB(48, 92, 168))
+		tint("LowerTorso", Color3.fromRGB(32, 64, 128))
+		if head then
+			bit(head, CFrame.new(0, 0.15, -0.35), Vector3.new(1.15, 0.18, 0.12), Color3.fromRGB(20, 24, 32), Enum.Material.SmoothPlastic, nil, "Visor")
+		end
+		bit(torso, CFrame.new(-0.7, 0.45, 0), Vector3.new(0.35, 0.28, 0.9), Color3.fromRGB(236, 236, 240), Enum.Material.SmoothPlastic, nil, "Collar")
+		bit(torso, CFrame.new(0.7, 0.45, 0), Vector3.new(0.35, 0.28, 0.9), Color3.fromRGB(236, 236, 240), Enum.Material.SmoothPlastic, nil, "Collar")
+		bit(torso, CFrame.new(0.9, 0.1, -0.55) * CFrame.Angles(0, 0, math.rad(90)), Vector3.new(0.7, 0.35, 0.35), Color3.fromRGB(210, 214, 220), Enum.Material.Metal, Enum.PartType.Cylinder, "Megaphone")
+	elseif style == "tumba" then
+		tint("UpperTorso", Color3.fromRGB(122, 72, 42))
+		tint("Torso", Color3.fromRGB(122, 72, 42))
+		tint("LowerTorso", Color3.fromRGB(86, 52, 32))
+		bit(torso, CFrame.new(-1.05, 0.35, 0), Vector3.new(0.85, 0.45, 1.15), Color3.fromRGB(92, 58, 36), Enum.Material.Wood, nil, "Pad")
+		bit(torso, CFrame.new(1.05, 0.35, 0), Vector3.new(0.85, 0.45, 1.15), Color3.fromRGB(92, 58, 36), Enum.Material.Wood, nil, "Pad")
+		if head then
+			bit(head, CFrame.new(0, 0.35, 0), Vector3.new(1.35, 0.45, 1.35), Color3.fromRGB(74, 48, 30), Enum.Material.Wood, nil, "Helm")
+		end
+		bit(torso, CFrame.new(0, -0.7, 0), Vector3.new(2.1, 0.22, 1.05), Color3.fromRGB(48, 36, 28), Enum.Material.Wood, nil, "Belt")
+	elseif style == "otrazhatel" then
+		tint("UpperTorso", Color3.fromRGB(186, 150, 48))
+		tint("Torso", Color3.fromRGB(186, 150, 48))
+		tint("LowerTorso", Color3.fromRGB(140, 112, 36))
+		bit(torso, CFrame.new(0, 0.15, -0.55), Vector3.new(1.5, 1.15, 0.16), Color3.fromRGB(230, 220, 140), Enum.Material.Metal, nil, "Plate")
+		bit(torso, CFrame.new(0, 0.15, -0.66), Vector3.new(0.7, 0.7, 0.08), Color3.fromRGB(255, 244, 180), Enum.Material.Neon, nil, "Mirror")
+		bit(torso, CFrame.new(-0.95, 0.1, 0), Vector3.new(0.35, 0.9, 0.45), Color3.fromRGB(200, 202, 206), Enum.Material.Metal, nil, "Guard")
+		if head then
+			bit(head, CFrame.new(0, 0.25, 0), Vector3.new(1.25, 0.22, 1.25), Color3.fromRGB(230, 190, 70), Enum.Material.Metal, nil, "Band")
+		end
+	elseif style == "dvornik" then
+		tint("UpperTorso", Color3.fromRGB(46, 112, 64))
+		tint("Torso", Color3.fromRGB(46, 112, 64))
+		tint("LowerTorso", Color3.fromRGB(36, 78, 48))
+		bit(torso, CFrame.new(0, 0.1, -0.5), Vector3.new(1.7, 1.3, 0.16), Color3.fromRGB(72, 150, 86), Enum.Material.Fabric, nil, "Vest")
+		if head then
+			bit(head, CFrame.new(0, 0.45, 0), Vector3.new(1.3, 0.28, 1.3), Color3.fromRGB(42, 92, 52), Enum.Material.Fabric, Enum.PartType.Cylinder, "Cap")
+			bit(head, CFrame.new(0, 0.32, -0.55), Vector3.new(1.35, 0.1, 0.45), Color3.fromRGB(36, 72, 44), Enum.Material.Fabric, nil, "Brim")
+		end
+		bit(torso, CFrame.new(0, 0.2, 0.7) * CFrame.Angles(math.rad(18), 0, 0), Vector3.new(0.18, 3.4, 0.18), Color3.fromRGB(120, 82, 48), Enum.Material.Wood, nil, "Broom")
+		bit(torso, CFrame.new(0, -1.2, 0.95), Vector3.new(0.9, 0.45, 0.35), Color3.fromRGB(86, 140, 72), Enum.Material.Grass, nil, "Bristle")
+	end
+end
+
+local function paint(character, color, title, hp, maxHp, style)
 	local shirt = character:FindFirstChildOfClass("Shirt")
 	if shirt then
 		shirt:Destroy()
@@ -943,6 +1090,7 @@ local function paint(character, color, title, hp, maxHp)
 	fill.BackgroundColor3 = color
 	fill.BorderSizePixel = 0
 	fill.Parent = back
+	dress(character, style)
 end
 
 local function refreshBar(model, hp, maxHp)
@@ -991,8 +1139,93 @@ local SOUND_ID = {
 
 local liveTrack = setmetatable({}, { __mode = "k" })
 
-local function playAnim()
-	-- Взмахи каталога двигают HumanoidRootPart и отбрасывают бойца. Эффект рисуется отдельно.
+local poseToken = setmetatable({}, { __mode = "k" })
+local poseBase = setmetatable({}, { __mode = "k" })
+
+local POSES = {
+	slash = {
+		{ 0.06, { RightShoulder = CFrame.Angles(math.rad(-30), 0, math.rad(50)), LeftShoulder = CFrame.Angles(0, 0, math.rad(-25)), Waist = CFrame.Angles(0, math.rad(-20), 0) } },
+		{ 0.08, { RightShoulder = CFrame.Angles(math.rad(75), math.rad(25), math.rad(-35)), LeftShoulder = CFrame.Angles(math.rad(20), 0, math.rad(30)), Waist = CFrame.Angles(0, math.rad(35), 0), Neck = CFrame.Angles(math.rad(10), math.rad(20), 0) } },
+		{ 0.1, { RightShoulder = CFrame.Angles(math.rad(10), 0, math.rad(10)), Waist = CFrame.new(), Neck = CFrame.new() } },
+	},
+	point = {
+		{ 0.07, { RightShoulder = CFrame.Angles(math.rad(-90), math.rad(20), math.rad(15)), Neck = CFrame.Angles(math.rad(-8), math.rad(12), 0) } },
+		{ 0.12, { RightShoulder = CFrame.Angles(math.rad(-80), math.rad(10), 0), LeftShoulder = CFrame.Angles(math.rad(-20), 0, math.rad(-15)) } },
+		{ 0.1, { RightShoulder = CFrame.new(), Neck = CFrame.new(), LeftShoulder = CFrame.new() } },
+	},
+	cheer = {
+		{ 0.08, { RightShoulder = CFrame.Angles(math.rad(-140), 0, math.rad(30)), LeftShoulder = CFrame.Angles(math.rad(-140), 0, math.rad(-30)), Waist = CFrame.Angles(math.rad(-12), 0, 0) } },
+		{ 0.12, { RightShoulder = CFrame.Angles(math.rad(-110), math.rad(15), math.rad(10)), LeftShoulder = CFrame.Angles(math.rad(-110), math.rad(-15), math.rad(-10)) } },
+		{ 0.1, { RightShoulder = CFrame.new(), LeftShoulder = CFrame.new(), Waist = CFrame.new() } },
+	},
+	wave = {
+		{ 0.07, { RightShoulder = CFrame.Angles(0, 0, math.rad(80)), LeftShoulder = CFrame.Angles(0, 0, math.rad(-80)), Waist = CFrame.Angles(0, math.rad(25), 0) } },
+		{ 0.08, { RightShoulder = CFrame.Angles(math.rad(-40), 0, math.rad(-20)), LeftShoulder = CFrame.Angles(math.rad(-40), 0, math.rad(20)), Waist = CFrame.Angles(0, math.rad(-25), 0) } },
+		{ 0.1, { RightShoulder = CFrame.new(), LeftShoulder = CFrame.new(), Waist = CFrame.new() } },
+	},
+	lunge = {
+		{ 0.06, { RightShoulder = CFrame.Angles(math.rad(-100), 0, math.rad(20)), Waist = CFrame.Angles(math.rad(18), math.rad(-15), 0), Neck = CFrame.Angles(math.rad(12), 0, 0) } },
+		{ 0.1, { RightShoulder = CFrame.Angles(math.rad(40), math.rad(10), math.rad(-15)), Waist = CFrame.Angles(math.rad(-8), math.rad(20), 0) } },
+		{ 0.1, { RightShoulder = CFrame.new(), Waist = CFrame.new(), Neck = CFrame.new() } },
+	},
+}
+
+local function flourish(model, kind)
+	if not model then
+		return
+	end
+	local motors = {}
+	for _, item in model:GetDescendants() do
+		if item:IsA("Motor6D") and (item.Name == "RightShoulder" or item.Name == "LeftShoulder" or item.Name == "Waist" or item.Name == "Neck") then
+			motors[item.Name] = item
+			if not poseBase[item] then
+				poseBase[item] = item.C0
+			end
+		end
+	end
+	if not motors.RightShoulder and not motors.LeftShoulder then
+		return
+	end
+	poseToken[model] = (poseToken[model] or 0) + 1
+	local mine = poseToken[model]
+	local steps = POSES[kind] or POSES.slash
+	task.spawn(function()
+		for _, step in steps do
+			if poseToken[model] ~= mine then
+				return
+			end
+			local duration = step[1]
+			local goals = step[2]
+			local started = os.clock()
+			local from = {}
+			for name, motor in motors do
+				from[name] = motor.C0
+			end
+			while os.clock() - started < duration do
+				if poseToken[model] ~= mine then
+					return
+				end
+				local alpha = (os.clock() - started) / duration
+				for name, motor in motors do
+					local goal = goals[name]
+					local base = poseBase[motor]
+					if goal and base and motor.Parent then
+						motor.C0 = from[name]:Lerp(base * goal, alpha)
+					end
+				end
+				task.wait()
+			end
+		end
+		if poseToken[model] ~= mine then
+			return
+		end
+		for _, motor in motors do
+			local base = poseBase[motor]
+			if base and motor.Parent then
+				motor.C0 = base
+			end
+		end
+	end)
 end
 
 local function sfx(position, name, volume, pitch)
@@ -1034,17 +1267,23 @@ local function swipe(entry, color)
 	if flat.Magnitude < 0.1 then
 		return
 	end
-	local blade = Instance.new("Part")
-	blade.Name = "Swipe"
-	blade.Size = Vector3.new(0.25, 1.6, 3.4)
-	blade.Material = Enum.Material.Neon
-	blade.Color = color or Color3.fromRGB(255, 244, 220)
-	blade.Anchored = true
-	blade.CanCollide = false
-	blade.CanQuery = false
-	blade.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 1.5, 0) + flat.Unit * 3.2, root.Position + flat)
-	blade.Parent = fxFolder
-	Debris:AddItem(blade, 0.12)
+	local colorUse = color or Color3.fromRGB(255, 244, 220)
+	for step = 1, 3 do
+		local yaw = math.rad(-28 + step * 18)
+		local dir = CFrame.fromAxisAngle(Vector3.yAxis, yaw) * flat.Unit
+		local blade = Instance.new("Part")
+		blade.Name = "Swipe"
+		blade.Size = Vector3.new(0.18, 1.3 + step * 0.25, 2.4 + step * 0.45)
+		blade.Material = Enum.Material.Neon
+		blade.Color = colorUse
+		blade.Transparency = 0.15 + step * 0.18
+		blade.Anchored = true
+		blade.CanCollide = false
+		blade.CanQuery = false
+		blade.CFrame = CFrame.lookAt(root.Position + Vector3.new(0, 1.2 + step * 0.15, 0) + dir * (2.4 + step * 0.6), root.Position + dir)
+		blade.Parent = fxFolder
+		Debris:AddItem(blade, 0.08 + step * 0.04)
+	end
 end
 
 local function cue(entry, animKind, soundName, pitch, speed)
@@ -1057,6 +1296,7 @@ local function cue(entry, animKind, soundName, pitch, speed)
 	end
 	local info = entry.state and entry.state.fighter and FIGHTERS[entry.state.fighter]
 	swipe(entry, info and info.color)
+	flourish(entry.model, animKind)
 end
 
 local function beamVisual(a, b, color, life)
@@ -1154,6 +1394,9 @@ local function enemiesOf(source)
 end
 
 local function face(entry, aim)
+	if entry.kind == "player" then
+		return
+	end
 	local root = rootPart(entry.model)
 	if not root or typeof(aim) ~= "Vector3" then
 		return
@@ -1165,7 +1408,6 @@ local function face(entry, aim)
 	local vel = root.AssemblyLinearVelocity
 	root.CFrame = CFrame.new(root.Position, root.Position + flat)
 	root.AssemblyLinearVelocity = vel
-	root.AssemblyAngularVelocity = Vector3.zero
 end
 
 local function breakInvis(st)
@@ -2225,7 +2467,7 @@ local function startFight()
 			if player.Character and rootPart(player.Character) then
 				teleport(player.Character, pitCFrame(player.UserId))
 				local info = FIGHTERS[st.fighter]
-				paint(player.Character, info.color, info.name, st.hp, st.maxHp)
+				paint(player.Character, info.color, info.name, st.hp, st.maxHp, st.fighter)
 			else
 				st.pendingSpawn = true
 				player:LoadCharacter()
@@ -2239,41 +2481,58 @@ spawnDummy = function(slot, serial)
 		return
 	end
 	local model = Instance.new("Model")
-	model.Name = "Болван"
+	local looks = {
+		{ name = "Хулиган", body = Color3.fromRGB(120, 36, 40), cloth = Color3.fromRGB(28, 28, 32), skin = Color3.fromRGB(186, 140, 114), hat = "cap" },
+		{ name = "Карманник", body = Color3.fromRGB(72, 78, 88), cloth = Color3.fromRGB(36, 40, 48), skin = Color3.fromRGB(198, 164, 132), hat = "band" },
+		{ name = "Громила", body = Color3.fromRGB(48, 52, 46), cloth = Color3.fromRGB(24, 26, 24), skin = Color3.fromRGB(160, 128, 104), hat = "mask" },
+	}
+	local look = looks[((slot - 1) % 3) + 1]
+	model.Name = look.name
 	local root = Instance.new("Part")
 	root.Name = "HumanoidRootPart"
 	root.Size = Vector3.new(2, 2, 1)
-	root.Color = Color3.fromRGB(120, 110, 110)
-	root.Material = Enum.Material.SmoothPlastic
-	root.TopSurface = Enum.SurfaceType.Smooth
-	root.BottomSurface = Enum.SurfaceType.Smooth
+	root.Transparency = 1
+	root.CanCollide = false
 	root.Parent = model
-	local torso = Instance.new("Part")
-	torso.Name = "Torso"
-	torso.Size = Vector3.new(2, 2, 1)
-	torso.Color = Color3.fromRGB(150, 90, 90)
-	torso.Material = Enum.Material.SmoothPlastic
-	torso.CFrame = CFrame.new(0, 0, 0)
-	torso.Parent = model
-	local weld = Instance.new("WeldConstraint")
-	weld.Part0 = root
-	weld.Part1 = torso
-	weld.Parent = root
-	local head = Instance.new("Part")
-	head.Name = "Head"
-	head.Size = Vector3.new(1.2, 1.2, 1.2)
-	head.Color = Color3.fromRGB(190, 160, 140)
-	head.CFrame = CFrame.new(0, 2, 0)
-	head.Parent = model
-	local weldHead = Instance.new("WeldConstraint")
-	weldHead.Part0 = root
-	weldHead.Part1 = head
-	weldHead.Parent = root
+	local function limb(name, size, cf, color)
+		local piece = Instance.new("Part")
+		piece.Name = name
+		piece.Size = size
+		piece.Color = color
+		piece.Material = Enum.Material.SmoothPlastic
+		piece.CanCollide = false
+		piece.Massless = true
+		piece.CFrame = cf
+		piece.Parent = model
+		local weld = Instance.new("Weld")
+		weld.Part0 = root
+		weld.Part1 = piece
+		weld.C0 = cf
+		weld.Parent = piece
+		return piece
+	end
+	local torso = limb("Torso", Vector3.new(2, 2, 1), CFrame.new(0, 0, 0), look.body)
+	limb("Left Arm", Vector3.new(0.7, 2, 0.7), CFrame.new(-1.35, 0, 0), look.cloth)
+	limb("Right Arm", Vector3.new(0.7, 2, 0.7), CFrame.new(1.35, 0, 0), look.cloth)
+	limb("Left Leg", Vector3.new(0.75, 2, 0.75), CFrame.new(-0.5, -2, 0), look.cloth)
+	limb("Right Leg", Vector3.new(0.75, 2, 0.75), CFrame.new(0.5, -2, 0), look.cloth)
+	local head = limb("Head", Vector3.new(1.15, 1.15, 1.15), CFrame.new(0, 1.6, 0), look.skin)
+	if look.hat == "cap" then
+		limb("Cap", Vector3.new(1.25, 0.28, 1.25), CFrame.new(0, 2.2, 0), look.cloth)
+		limb("Brim", Vector3.new(1.3, 0.1, 0.4), CFrame.new(0, 2.05, -0.6), look.cloth)
+	elseif look.hat == "band" then
+		limb("Band", Vector3.new(1.2, 0.28, 0.2), CFrame.new(0, 1.7, -0.5), Color3.fromRGB(150, 40, 48))
+	else
+		limb("PadL", Vector3.new(0.9, 0.4, 1), CFrame.new(-1.45, 0.7, 0), look.cloth)
+		limb("PadR", Vector3.new(0.9, 0.4, 1), CFrame.new(1.45, 0.7, 0), look.cloth)
+		limb("Mask", Vector3.new(0.9, 0.35, 0.16), CFrame.new(0, 1.55, -0.55), Color3.fromRGB(20, 20, 20))
+	end
+	torso.CanCollide = true
 	local humanoid = Instance.new("Humanoid")
 	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 	humanoid.MaxHealth = 420
 	humanoid.Health = 420
-	humanoid.HipHeight = 2
+	humanoid.HipHeight = 3
 	humanoid.Parent = model
 	model.PrimaryPart = root
 	model.Parent = workspace
@@ -2290,7 +2549,24 @@ spawnDummy = function(slot, serial)
 	st.serial = serial
 	st.ownerPlayer = nil
 	dummyByModel[model] = st
-	paint(model, Color3.fromRGB(150, 90, 90), "Болван", st.hp, st.maxHp)
+	paint(model, look.body, look.name, st.hp, st.maxHp)
+	local function keep(name, color)
+		local piece = model:FindFirstChild(name)
+		if piece and piece:IsA("BasePart") then
+			piece.Color = color
+		end
+	end
+	keep("Head", look.skin)
+	keep("Left Arm", look.cloth)
+	keep("Right Arm", look.cloth)
+	keep("Left Leg", look.cloth)
+	keep("Right Leg", look.cloth)
+	keep("Cap", look.cloth)
+	keep("Brim", look.cloth)
+	keep("Band", Color3.fromRGB(150, 40, 48))
+	keep("Mask", Color3.fromRGB(20, 20, 20))
+	keep("PadL", look.cloth)
+	keep("PadR", look.cloth)
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
 end
@@ -2528,6 +2804,7 @@ local function tickDummies(now)
 				st.cd.attack = now + 1.15
 				local target = entryOfPlayer(nearest)
 				if target then
+					flourish(model, "slash")
 					applyDamage({ kind = "dummy", state = st, model = model }, target, 18, "physical")
 				end
 				if phase ~= "fight" then
@@ -2710,7 +2987,7 @@ local function setupCharacter(player, character)
 		if st.hp > st.maxHp then
 			st.hp = st.maxHp
 		end
-		paint(character, info.color, info.name, st.hp, st.maxHp)
+		paint(character, info.color, info.name, st.hp, st.maxHp, st.fighter)
 	end
 	humanoid.Died:Connect(function()
 		if playersState[player] ~= st then
@@ -2771,7 +3048,7 @@ pickRemote.OnServerEvent:Connect(function(player, fighterId)
 		st.pendingSpawn = false
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 		if player.Character and rootPart(player.Character) and humanoid and humanoid.Health > 0 then
-			paint(player.Character, info.color, info.name, st.hp, st.maxHp)
+			paint(player.Character, info.color, info.name, st.hp, st.maxHp, fighterId)
 		else
 			st.pendingSpawn = true
 			player:LoadCharacter()
@@ -2894,6 +3171,7 @@ end)
   <Item class="StarterPlayer" referent="4">
     <Properties>
       <string name="Name">StarterPlayer</string>
+      <token name="DevComputerMovementMode">1</token>
     </Properties>
     <Item class="StarterPlayerScripts" referent="5">
       <Properties>
@@ -2942,6 +3220,18 @@ local NAMES = {
 	tumba = { "Пень", "Толчок", "Баш" },
 	otrazhatel = { "Опа", "Зеркало", "Чисто" },
 	dvornik = { "Кадка", "Лужа", "Шланг" },
+}
+local BLURB = {
+	dictor = { "луч тишины", "вязкость вокруг", "три вспышки" },
+	tumba = { "щит и шипы", "толчок врагов", "удар лечит" },
+	otrazhatel = { "окно отражения", "рывок", "снять контроль" },
+	dvornik = { "кадка вперёд", "лечение и лужа", "струя" },
+}
+local MARK = {
+	dictor = "Д",
+	tumba = "Т",
+	otrazhatel = "О",
+	dvornik = "Дв",
 }
 local DISPLAY = {
 	dictor = "Диктор",
@@ -3021,9 +3311,19 @@ accent.BackgroundColor3 = MOSS
 accent.BorderSizePixel = 0
 accent.Parent = card
 corner(accent, 4)
-local nameLabel = label(card, UDim2.new(1, -36, 0, 24), UDim2.fromOffset(24, 10), "Боец", 20)
+local portrait = Instance.new("Frame")
+portrait.Size = UDim2.fromOffset(46, 46)
+portrait.Position = UDim2.fromOffset(22, 12)
+portrait.BackgroundColor3 = MOSS
+portrait.BorderSizePixel = 0
+portrait.Parent = card
+corner(portrait, 12)
+local mark = label(portrait, UDim2.fromScale(1, 1), UDim2.fromOffset(0, 0), "?", 22)
+mark.Font = Enum.Font.GothamBold
+mark.TextXAlignment = Enum.TextXAlignment.Center
+local nameLabel = label(card, UDim2.new(1, -84, 0, 24), UDim2.fromOffset(76, 12), "Боец", 20)
 nameLabel.Font = Enum.Font.GothamBold
-local levelLabel = label(card, UDim2.new(1, -36, 0, 16), UDim2.fromOffset(24, 34), "выбери карточку", 13)
+local levelLabel = label(card, UDim2.new(1, -84, 0, 16), UDim2.fromOffset(76, 36), "выбери карточку", 13)
 levelLabel.TextColor3 = MUTED
 local xpBack = Instance.new("Frame")
 xpBack.Size = UDim2.new(1, -40, 0, 4)
@@ -3101,12 +3401,14 @@ local function abilityBox(x, keyName)
 	badge.Text = keyName
 	badge.Parent = box
 	corner(badge, 6)
-	local title = label(box, UDim2.new(1, -56, 0, 22), UDim2.fromOffset(46, 10), keyName, 16)
+	local title = label(box, UDim2.new(1, -56, 0, 22), UDim2.fromOffset(46, 8), keyName, 16)
 	title.Font = Enum.Font.GothamBold
-	local cd = label(box, UDim2.new(1, -20, 0, 28), UDim2.fromOffset(12, 40), "", 18)
+	local hint = label(box, UDim2.new(1, -16, 0, 16), UDim2.fromOffset(10, 32), "", 12)
+	hint.TextColor3 = MUTED
+	local cd = label(box, UDim2.new(1, -20, 0, 22), UDim2.fromOffset(10, 50), "", 16)
 	cd.Font = Enum.Font.GothamBold
 	cd.TextColor3 = GOLD
-	return { frame = box, title = title, cd = cd }
+	return { frame = box, title = title, hint = hint, cd = cd }
 end
 
 local boxes = {
@@ -3349,6 +3651,8 @@ local function applyState(packet)
 	end
 	if you and picked then
 		nameLabel.Text = DISPLAY[you.fighter] or you.fighter
+		mark.Text = MARK[you.fighter] or "?"
+		portrait.BackgroundColor3 = FIGHTER_COLOR[you.fighter] or MOSS
 		accent.BackgroundColor3 = FIGHTER_COLOR[you.fighter] or MOSS
 		local nextXp = you.nextXp or you.xp
 		if you.level >= 6 then
@@ -3379,9 +3683,13 @@ local function applyState(packet)
 		goldLabel.Text = tostring(you.gold) .. " золота"
 		killLabel.Text = tostring(you.kills) .. " убийств     смертей " .. tostring(you.deaths)
 		local names = NAMES[you.fighter] or { "Q", "E", "R" }
+		local blurbs = BLURB[you.fighter] or { "", "", "" }
 		paintBox(boxes.q, names[1], you.cd.q, false, "")
 		paintBox(boxes.e, names[2], you.cd.e, you.lockE, "со 2 уровня")
 		paintBox(boxes.r, names[3], you.cd.r, you.lockR, "с 4 уровня")
+		boxes.q.hint.Text = blurbs[1]
+		boxes.e.hint.Text = blurbs[2]
+		boxes.r.hint.Text = blurbs[3]
 		paintSlot(slots.jacket, you.items and you.items.jacket, you.cd.jacket)
 		paintSlot(slots.whistle, you.items and you.items.whistle, you.cd.whistle)
 		paintSlot(slots.energy, you.items and you.items.energy, you.cd.energy)
@@ -3403,6 +3711,8 @@ local function applyState(packet)
 		end
 	else
 		nameLabel.Text = "Боец не выбран"
+		mark.Text = "?"
+		portrait.BackgroundColor3 = MOSS
 		accent.BackgroundColor3 = MOSS
 		levelLabel.Text = "выбери карточку"
 		goldLabel.Text = ""
@@ -3489,10 +3799,14 @@ RunService:BindToRenderStep("YamaShiftLock", Enum.RenderPriority.Camera.Value + 
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local camera = workspace.CurrentCamera
 	local menu = picker.Visible or shop.Visible
+	local align = root and root:FindFirstChild("YamaAlign")
 	if menu or not humanoid or not root or humanoid.Health <= 0 then
 		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
 		UserInputService.MouseIconEnabled = true
 		cross.Visible = false
+		if align then
+			align.Enabled = false
+		end
 		if humanoid then
 			humanoid.AutoRotate = true
 		end
@@ -3503,13 +3817,24 @@ RunService:BindToRenderStep("YamaShiftLock", Enum.RenderPriority.Camera.Value + 
 	humanoid.AutoRotate = false
 	humanoid.CameraOffset = Vector3.new(1.75, 0.35, 0)
 	cross.Visible = true
+	if not align then
+		local attachment = Instance.new("Attachment")
+		attachment.Name = "YamaTurn"
+		attachment.Parent = root
+		align = Instance.new("AlignOrientation")
+		align.Name = "YamaAlign"
+		align.Mode = Enum.OrientationAlignmentMode.OneAttachment
+		align.Attachment0 = attachment
+		align.RigidityEnabled = false
+		align.Responsiveness = 200
+		align.MaxTorque = 100000
+		align.Parent = root
+	end
 	local look = camera.CFrame.LookVector
 	local flat = Vector3.new(look.X, 0, look.Z)
 	if flat.Magnitude > 0.05 then
-		local vel = root.AssemblyLinearVelocity
-		root.CFrame = CFrame.new(root.Position, root.Position + flat)
-		root.AssemblyLinearVelocity = vel
-		root.AssemblyAngularVelocity = Vector3.zero
+		align.Enabled = true
+		align.CFrame = CFrame.lookAt(Vector3.zero, flat)
 	end
 end)
 
