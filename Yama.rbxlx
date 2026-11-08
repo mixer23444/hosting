@@ -104,6 +104,11 @@ local TEX = {
 	castle = "rbxassetid://4724583747",
 	fabric = "rbxassetid://1199995738",
 	asphalt = "rbxassetid://6372755229",
+	dirt = "rbxassetid://267584443",
+	water = "rbxassetid://12900348",
+	bark = "rbxassetid://30467437",
+	pebble = "rbxassetid://6927295847",
+	leaf = "rbxassetid://153516218",
 }
 
 local VISIBLE_FACES = {
@@ -147,12 +152,15 @@ end
 local function buildWorld()
 	Lighting.ClockTime = 13.5
 	Lighting.Brightness = 3
-	Lighting.Ambient = Color3.fromRGB(168, 176, 186)
-	Lighting.OutdoorAmbient = Color3.fromRGB(186, 194, 200)
-	Lighting.EnvironmentDiffuseScale = 0.65
-	Lighting.EnvironmentSpecularScale = 0.35
+	Lighting.Ambient = Color3.fromRGB(170, 184, 176)
+	Lighting.OutdoorAmbient = Color3.fromRGB(188, 204, 190)
+	Lighting.EnvironmentDiffuseScale = 0.7
+	Lighting.EnvironmentSpecularScale = 0.3
 	Lighting.GlobalShadows = true
-	Lighting.GeographicLatitude = 12
+	Lighting.GeographicLatitude = 8
+	Lighting.FogColor = Color3.fromRGB(186, 216, 228)
+	Lighting.FogStart = 150
+	Lighting.FogEnd = 460
 
 	local sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky")
 	sky.SkyboxBk = "rbxassetid://12064107"
@@ -161,21 +169,21 @@ local function buildWorld()
 	sky.SkyboxLf = "rbxassetid://12064115"
 	sky.SkyboxRt = "rbxassetid://12063984"
 	sky.SkyboxUp = "rbxassetid://12064131"
-	sky.SunAngularSize = 18
+	sky.SunAngularSize = 16
 	sky.Parent = Lighting
 
 	local atmo = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
-	atmo.Density = 0.12
-	atmo.Offset = 0.05
-	atmo.Color = Color3.fromRGB(196, 220, 240)
-	atmo.Decay = Color3.fromRGB(190, 214, 232)
-	atmo.Glare = 0.15
-	atmo.Haze = 0.25
+	atmo.Density = 0.22
+	atmo.Offset = 0.15
+	atmo.Color = Color3.fromRGB(188, 220, 236)
+	atmo.Decay = Color3.fromRGB(176, 210, 226)
+	atmo.Glare = 0.08
+	atmo.Haze = 1.1
 	atmo.Parent = Lighting
 
 	local sun = Lighting:FindFirstChildOfClass("SunRaysEffect") or Instance.new("SunRaysEffect")
-	sun.Intensity = 0.06
-	sun.Spread = 0.55
+	sun.Intensity = 0.05
+	sun.Spread = 0.5
 	sun.Parent = Lighting
 
 	local base = workspace:FindFirstChild("Baseplate")
@@ -184,137 +192,205 @@ local function buildWorld()
 	end
 
 	part({
-		name = "GrassField",
-		size = Vector3.new(3, 520, 520),
-		cf = CFrame.new(0, -1.2, 0) * CFrame.Angles(0, 0, math.rad(90)),
+		name = "Meadow",
+		size = Vector3.new(2.4, 520, 520),
+		cf = CFrame.new(0, 0.12, 0) * CFrame.Angles(0, 0, math.rad(90)),
 		shape = Enum.PartType.Cylinder,
-		color = Color3.fromRGB(236, 240, 230),
+		color = Color3.fromRGB(214, 228, 168),
 		material = Enum.Material.Grass,
 		texture = TEX.grass,
-		studs = 18,
+		studs = 14,
 		faces = { Enum.NormalId.Left, Enum.NormalId.Right, Enum.NormalId.Front, Enum.NormalId.Back },
 	})
 
-	part({
-		name = "PitBase",
-		size = Vector3.new(2, 132, 132),
-		cf = CFrame.new(0, 0.2, 0) * CFrame.Angles(0, 0, math.rad(90)),
-		shape = Enum.PartType.Cylinder,
-		color = Color3.fromRGB(210, 206, 198),
-		material = Enum.Material.Slate,
-		texture = TEX.concrete,
-		studs = 10,
-		faces = { Enum.NormalId.Left, Enum.NormalId.Right },
-	})
+	local function lawnTile(cx, cz, textureId, studs, color, material, name)
+		part({
+			name = name or "Lawn",
+			size = Vector3.new(7.7, 0.28, 7.7),
+			cf = CFrame.new(cx, 1.18, cz),
+			color = color,
+			material = material,
+			texture = textureId,
+			studs = studs,
+		})
+	end
 
-	local tile = 8
-	local reach = math.floor(62 / tile)
-	for x = -reach, reach do
-		for z = -reach, reach do
-			local cx = x * tile
-			local cz = z * tile
+	for x = -9, 9 do
+		for z = -9, 9 do
+			local cx = x * 8
+			local cz = z * 8
 			local dist = math.sqrt(cx * cx + cz * cz)
-			if dist <= 62 then
-				local texture = TEX.stone
-				local studs = 4
-				local color = Color3.fromRGB(214, 210, 202)
-				local material = Enum.Material.Slate
-				if dist < 16 then
-					texture = TEX.sand
-					studs = 5
-					color = Color3.fromRGB(236, 214, 168)
-					material = Enum.Material.Sand
-				elseif dist > 50 then
-					texture = TEX.castle
-					studs = 4
-					color = Color3.fromRGB(196, 190, 182)
-					material = Enum.Material.Cobblestone
-				elseif (x + z) % 4 == 0 then
-					texture = TEX.tile
-					studs = 3
-					color = Color3.fromRGB(228, 222, 210)
-					material = Enum.Material.Marble
-				elseif (x - z) % 5 == 0 then
-					texture = TEX.brick
-					studs = 3
-					color = Color3.fromRGB(214, 176, 156)
-					material = Enum.Material.Brick
+			local fromPond = math.sqrt((cx + 34) ^ 2 + (cz - 26) ^ 2)
+			if dist <= 78 and fromPond > 15 then
+				if dist < 14 then
+					lawnTile(cx, cz, TEX.sand, 4, Color3.fromRGB(236, 214, 160), Enum.Material.Sand, "Clearing")
+				elseif math.abs(x) <= 1 or math.abs(z) <= 1 then
+					lawnTile(cx, cz, TEX.dirt, 4, Color3.fromRGB(176, 140, 96), Enum.Material.Slate, "Path")
+				elseif (x + z) % 6 == 0 then
+					lawnTile(cx, cz, TEX.pebble, 3, Color3.fromRGB(196, 190, 176), Enum.Material.Concrete, "Gravel")
+				else
+					lawnTile(cx, cz, TEX.leaf, 5, Color3.fromRGB(168, 198, 104), Enum.Material.Grass, "GrassTile")
 				end
-				part({
-					name = "FloorTile",
-					size = Vector3.new(tile - 0.12, 0.42, tile - 0.12),
-					cf = CFrame.new(cx, 1.35, cz),
-					color = color,
-					material = material,
-					texture = texture,
-					studs = studs,
-				})
 			end
 		end
 	end
 
 	part({
-		name = "CenterRing",
-		size = Vector3.new(0.18, 22, 22),
-		cf = CFrame.new(0, 1.62, 0) * CFrame.Angles(0, 0, math.rad(90)),
-		shape = Enum.PartType.Cylinder,
-		color = Color3.fromRGB(232, 186, 92),
-		material = Enum.Material.Metal,
+		name = "Pond",
+		size = Vector3.new(26, 0.25, 18),
+		cf = CFrame.new(-34, 1.36, 26),
+		color = Color3.fromRGB(120, 176, 196),
+		material = Enum.Material.Glass,
+		transparency = 0.25,
+		texture = TEX.water,
+		studs = 6,
 		collide = false,
 		query = false,
-		texture = TEX.metal,
-		studs = 2,
-		faces = { Enum.NormalId.Left, Enum.NormalId.Right },
 	})
-
-	for i = 1, 36 do
-		local angle = (i / 36) * math.pi * 2
-		local pos = Vector3.new(math.cos(angle) * 70, 10.2, math.sin(angle) * 70)
-		local cf = CFrame.lookAt(pos, Vector3.new(0, 10.2, 0))
+	for s = 1, 10 do
+		local angle = (s / 10) * math.pi * 2
 		part({
-			name = "Wall",
-			size = Vector3.new(14.2, 18, 3.4),
-			cf = cf,
-			color = Color3.fromRGB(206, 198, 188),
-			material = Enum.Material.Cobblestone,
-			texture = TEX.castle,
-			studs = 3.5,
+			name = "Shore",
+			size = Vector3.new(4.2, 0.35, 3.2),
+			cf = CFrame.new(-34 + math.cos(angle) * 14, 1.34, 26 + math.sin(angle) * 10),
+			color = Color3.fromRGB(214, 196, 150),
+			material = Enum.Material.Sand,
+			texture = TEX.sand,
+			studs = 2,
+			collide = false,
+			query = false,
 		})
-		part({
-			name = "WallCap",
-			size = Vector3.new(14.2, 0.7, 4.2),
-			cf = cf * CFrame.new(0, 9.2, 0),
-			color = Color3.fromRGB(228, 210, 176),
+	end
+
+	for n = 1, 16 do
+		local angle = (n / 16) * math.pi * 2 + 0.2
+		local radius = 30 + (n % 4) * 11
+		local pos = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+		if (pos - Vector3.new(shopPos.X, 0, shopPos.Z)).Magnitude < 16 or (pos - Vector3.new(-34, 0, 26)).Magnitude < 16 then
+			continue
+		end
+		local trunk = part({
+			name = "Trunk",
+			shape = Enum.PartType.Cylinder,
+			size = Vector3.new(11, 1.7, 1.7),
+			cf = CFrame.new(pos.X, 6.4, pos.Z) * CFrame.Angles(0, 0, math.rad(90)),
+			color = Color3.fromRGB(122, 84, 52),
 			material = Enum.Material.Wood,
-			texture = TEX.plank,
+			texture = TEX.bark,
+			studs = 2,
+		})
+		trunk.CanQuery = true
+		part({
+			name = "Canopy",
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(9, 7, 9),
+			cf = CFrame.new(pos.X, 12.2, pos.Z),
+			color = Color3.fromRGB(92, 158, 78),
+			material = Enum.Material.Grass,
+			texture = TEX.leaf,
 			studs = 3,
 			collide = false,
+			query = false,
 		})
-		if i % 2 == 0 then
+		part({
+			name = "CanopyB",
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(6, 5, 6),
+			cf = CFrame.new(pos.X + 2.2, 13.4, pos.Z - 1.4),
+			color = Color3.fromRGB(124, 176, 86),
+			material = Enum.Material.Grass,
+			texture = TEX.grass,
+			studs = 2.5,
+			collide = false,
+			query = false,
+		})
+	end
+
+	for n = 1, 8 do
+		local angle = (n / 8) * math.pi * 2
+		local cf = CFrame.lookAt(Vector3.new(math.cos(angle) * 22, 1.5, math.sin(angle) * 22), Vector3.new(0, 1.5, 0))
+		part({
+			name = "Bench",
+			size = Vector3.new(4.2, 0.35, 1.3),
+			cf = cf * CFrame.new(0, 0.4, 0),
+			color = Color3.fromRGB(168, 118, 72),
+			material = Enum.Material.WoodPlanks,
+			texture = TEX.wood,
+			studs = 1.5,
+		})
+		part({
+			name = "BenchBack",
+			size = Vector3.new(4.2, 1.3, 0.28),
+			cf = cf * CFrame.new(0, 1.1, 0.55),
+			color = Color3.fromRGB(150, 104, 64),
+			material = Enum.Material.Wood,
+			texture = TEX.plank,
+			studs = 1.4,
+			collide = false,
+		})
+	end
+
+	for n = 1, 22 do
+		local angle = (n / 22) * math.pi * 2
+		local radius = 58 + (n % 3) * 6
+		local pos = Vector3.new(math.cos(angle) * radius, 1.5, math.sin(angle) * radius)
+		part({
+			name = "Bush",
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(3.4, 2.2, 3.4),
+			cf = CFrame.new(pos),
+			color = (n % 2 == 0) and Color3.fromRGB(86, 150, 78) or Color3.fromRGB(118, 170, 84),
+			material = Enum.Material.Grass,
+			texture = TEX.leaf,
+			studs = 2,
+			collide = false,
+			query = false,
+		})
+		part({
+			name = "Bloom",
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(0.8, 0.8, 0.8),
+			cf = CFrame.new(pos + Vector3.new(0.4, 1.1, 0)),
+			color = ({ Color3.fromRGB(214, 92, 96), Color3.fromRGB(236, 196, 86), Color3.fromRGB(232, 232, 236) })[(n % 3) + 1],
+			material = Enum.Material.SmoothPlastic,
+			collide = false,
+			query = false,
+		})
+	end
+
+	for i = 1, 40 do
+		local angle = (i / 40) * math.pi * 2
+		local radius = 112 + (i % 4) * 5
+		local height = 26 + (i % 6) * 5
+		local pos = Vector3.new(math.cos(angle) * radius, height / 2 - 1, math.sin(angle) * radius)
+		local texture = (i % 3 == 0) and TEX.castle or TEX.stone
+		part({
+			name = "Cliff",
+			class = (i % 2 == 0) and "WedgePart" or nil,
+			size = Vector3.new(22 + (i % 3) * 6, height, 18 + (i % 4) * 3),
+			cf = CFrame.new(pos) * CFrame.Angles(0, angle + 0.6, 0),
+			color = Color3.fromRGB(168, 162, 154),
+			material = Enum.Material.Slate,
+			texture = texture,
+			studs = 7,
+		})
+		part({
+			name = "Boulder",
+			size = Vector3.new(12, 8 + (i % 3) * 2, 14),
+			cf = CFrame.new(math.cos(angle) * (radius - 16), 4, math.sin(angle) * (radius - 16)) * CFrame.Angles(0, angle, math.rad((i % 5) - 2)),
+			color = Color3.fromRGB(150, 146, 138),
+			material = Enum.Material.Basalt,
+			texture = TEX.castle,
+			studs = 4,
+		})
+		if i % 3 == 0 then
 			part({
-				name = "Merlon",
-				size = Vector3.new(4.2, 2.4, 3.6),
-				cf = cf * CFrame.new(0, 10.8, 0),
-				color = Color3.fromRGB(200, 192, 182),
-				material = Enum.Material.Cobblestone,
-				texture = TEX.stone,
-				studs = 2.5,
-			})
-		end
-		if i % 4 == 0 then
-			local cloth = ({
-				Color3.fromRGB(186, 64, 52),
-				Color3.fromRGB(58, 104, 176),
-				Color3.fromRGB(214, 168, 64),
-				Color3.fromRGB(62, 140, 96),
-			})[(i / 4 - 1) % 4 + 1]
-			part({
-				name = "Banner",
-				size = Vector3.new(3.2, 6.5, 0.18),
-				cf = cf * CFrame.new(0, 1.5, -2.1),
-				color = cloth,
-				material = Enum.Material.Fabric,
-				texture = TEX.fabric,
+				name = "Moss",
+				size = Vector3.new(8, 1.2, 8),
+				cf = CFrame.new(math.cos(angle) * (radius - 10), height * 0.45, math.sin(angle) * (radius - 10)),
+				color = Color3.fromRGB(120, 158, 86),
+				material = Enum.Material.Grass,
+				texture = TEX.leaf,
 				studs = 2,
 				collide = false,
 				query = false,
@@ -322,131 +398,73 @@ local function buildWorld()
 		end
 	end
 
-	for i = 1, 40 do
-		local angle = (i / 40) * math.pi * 2
-		local pos = Vector3.new(math.cos(angle) * 104, 24, math.sin(angle) * 104)
-		local cf = CFrame.lookAt(pos, Vector3.new(0, 24, 0))
+	for i = 1, 28 do
+		local angle = (i / 28) * math.pi * 2 + 0.08
+		local radius = 168
+		local height = 58 + (i % 5) * 8
+		local pos = Vector3.new(math.cos(angle) * radius, height / 2 - 4, math.sin(angle) * radius)
 		part({
-			name = "Gallery",
-			size = Vector3.new(18.5, 1.15, 16),
+			name = "Ridge",
+			size = Vector3.new(42, height, 28),
+			cf = CFrame.lookAt(pos, Vector3.new(0, pos.Y, 0)),
+			color = Color3.fromRGB(142, 138, 132),
+			material = Enum.Material.Basalt,
+			texture = (i % 2 == 0) and TEX.stone or TEX.castle,
+			studs = 10,
+		})
+	end
+
+	for i = 1, 24 do
+		local angle = (i / 24) * math.pi * 2
+		local pos = Vector3.new(math.cos(angle) * 125, 4.4, math.sin(angle) * 125)
+		local cf = CFrame.lookAt(pos, Vector3.new(0, 4.4, 0))
+		part({
+			name = "Overlook",
+			size = Vector3.new(36, 1.1, 16),
 			cf = cf,
-			color = Color3.fromRGB(214, 176, 122),
-			material = Enum.Material.WoodPlanks,
-			texture = TEX.wood,
+			color = Color3.fromRGB(186, 176, 160),
+			material = Enum.Material.Cobblestone,
+			texture = TEX.pebble,
 			studs = 3,
 		})
 		part({
-			name = "Rail",
-			size = Vector3.new(18.2, 0.35, 0.35),
-			cf = cf * CFrame.new(0, 2.3, -7.2),
-			color = Color3.fromRGB(120, 78, 48),
+			name = "OverlookRail",
+			size = Vector3.new(34, 0.3, 0.35),
+			cf = cf * CFrame.new(0, 1.6, -6.5),
+			color = Color3.fromRGB(120, 82, 52),
 			material = Enum.Material.Wood,
-			texture = TEX.plank,
-			studs = 2,
-			collide = false,
-		})
-		if i % 2 == 0 then
-			part({
-				name = "Post",
-				size = Vector3.new(0.7, 3.4, 0.7),
-				cf = cf * CFrame.new(0, 1.7, -7.2),
-				color = Color3.fromRGB(112, 74, 46),
-				material = Enum.Material.Wood,
-				texture = TEX.wood,
-				studs = 1.5,
-				collide = false,
-			})
-		end
-	end
-
-	for i = 0, 3 do
-		local angle = (i / 4) * math.pi * 2 + 0.5
-		local pos = Vector3.new(math.cos(angle) * 26, 7.6, math.sin(angle) * 26)
-		local cf = CFrame.lookAt(pos, Vector3.new(0, pos.Y, 0))
-		part({
-			name = "Pillar",
-			size = Vector3.new(3.6, 12, 3.6),
-			cf = cf,
-			color = Color3.fromRGB(226, 220, 210),
-			material = Enum.Material.Marble,
-			texture = TEX.marble,
-			studs = 3,
-		})
-		part({
-			name = "PillarBand",
-			size = Vector3.new(4.1, 0.7, 4.1),
-			cf = cf * CFrame.new(0, 2.2, 0),
-			color = Color3.fromRGB(214, 176, 86),
-			material = Enum.Material.Metal,
-			texture = TEX.metal,
-			studs = 1.2,
-			collide = false,
-		})
-		part({
-			name = "PillarCap",
-			size = Vector3.new(4.6, 0.8, 4.6),
-			cf = cf * CFrame.new(0, 6.3, 0),
-			color = Color3.fromRGB(206, 198, 186),
-			material = Enum.Material.Slate,
-			texture = TEX.stone,
+			texture = TEX.wood,
 			studs = 2,
 			collide = false,
 		})
 	end
 
-	for n = 1, 28 do
-		local angle = (n / 28) * math.pi * 2
-		local radius = 82 + (n % 3) * 4
-		local pos = Vector3.new(math.cos(angle) * radius, 1.15, math.sin(angle) * radius)
-		part({
-			name = "Bush",
-			size = Vector3.new(3.2, 1.6, 3.2),
-			cf = CFrame.new(pos),
-			color = Color3.fromRGB(186, 214, 120),
-			material = Enum.Material.Grass,
-			texture = TEX.grass,
-			studs = 2,
-			collide = false,
-			query = false,
-		})
-		part({
-			name = "Flower",
-			shape = Enum.PartType.Ball,
-			size = Vector3.new(1.1, 1.1, 1.1),
-			cf = CFrame.new(pos + Vector3.new(0, 1.2, 0)),
-			color = (n % 2 == 0) and Color3.fromRGB(214, 86, 78) or Color3.fromRGB(236, 196, 72),
-			material = Enum.Material.SmoothPlastic,
-			collide = false,
-			query = false,
-		})
-	end
-
-	local shopCf = CFrame.lookAt(shopPos + Vector3.new(0, 0.45, 0), Vector3.new(0, shopPos.Y + 0.45, 0))
+	local shopCf = CFrame.lookAt(shopPos + Vector3.new(0, 0.55, 0), Vector3.new(0, shopPos.Y + 0.55, 0))
 	local counter = part({
 		name = "Shop",
 		size = Vector3.new(11, 4, 3.2),
 		cf = shopCf,
-		color = Color3.fromRGB(196, 142, 86),
+		color = Color3.fromRGB(186, 132, 78),
 		material = Enum.Material.Wood,
 		texture = TEX.wood,
 		studs = 2.5,
 	})
 	part({
 		name = "ShopTop",
-		size = Vector3.new(11.4, 0.35, 3.6),
+		size = Vector3.new(11.6, 0.3, 3.8),
 		cf = shopCf * CFrame.new(0, 2.15, 0),
-		color = Color3.fromRGB(92, 96, 102),
-		material = Enum.Material.Metal,
-		texture = TEX.metal,
-		studs = 1.4,
+		color = Color3.fromRGB(210, 206, 198),
+		material = Enum.Material.Marble,
+		texture = TEX.marble,
+		studs = 1.5,
 		collide = false,
 	})
 	part({
 		class = "WedgePart",
 		name = "Awning",
-		size = Vector3.new(12, 1.3, 4.5),
-		cf = shopCf * CFrame.new(0, 3.3, -2.4),
-		color = Color3.fromRGB(176, 62, 52),
+		size = Vector3.new(12.2, 1.2, 4.6),
+		cf = shopCf * CFrame.new(0, 3.35, -2.5),
+		color = Color3.fromRGB(86, 140, 92),
 		material = Enum.Material.Fabric,
 		texture = TEX.fabric,
 		studs = 2,
@@ -456,31 +474,30 @@ local function buildWorld()
 	part({
 		name = "CrateA",
 		size = Vector3.new(2.2, 2.2, 2.2),
-		cf = shopCf * CFrame.new(-3.2, -0.8, -2.6),
-		color = Color3.fromRGB(176, 124, 74),
+		cf = shopCf * CFrame.new(-3.4, -0.7, -2.8),
+		color = Color3.fromRGB(168, 118, 70),
 		material = Enum.Material.WoodPlanks,
 		texture = TEX.plank,
-		studs = 1.6,
+		studs = 1.5,
 	})
 	part({
 		name = "CrateB",
-		size = Vector3.new(1.8, 1.8, 1.8),
-		cf = shopCf * CFrame.new(3.4, -1, -2.4) * CFrame.Angles(0, 0.4, 0),
-		color = Color3.fromRGB(164, 116, 70),
+		size = Vector3.new(1.7, 1.7, 1.7),
+		cf = shopCf * CFrame.new(3.5, -0.95, -2.5),
+		color = Color3.fromRGB(154, 108, 66),
 		material = Enum.Material.WoodPlanks,
-		texture = TEX.wood,
-		studs = 1.4,
+		texture = TEX.bark,
+		studs = 1.3,
 	})
 	local sign = Instance.new("BillboardGui")
-	sign.Size = UDim2.fromOffset(220, 120)
-	sign.StudsOffset = Vector3.new(0, 5.2, 0)
-	sign.AlwaysOnTop = false
+	sign.Size = UDim2.fromOffset(220, 110)
+	sign.StudsOffset = Vector3.new(0, 5.4, 0)
 	sign.Parent = counter
 	local signText = Instance.new("TextLabel")
 	signText.Size = UDim2.fromScale(1, 1)
-	signText.BackgroundTransparency = 0.2
-	signText.BackgroundColor3 = Color3.fromRGB(48, 28, 18)
-	signText.TextColor3 = Color3.fromRGB(255, 236, 206)
+	signText.BackgroundTransparency = 0.15
+	signText.BackgroundColor3 = Color3.fromRGB(48, 72, 46)
+	signText.TextColor3 = Color3.fromRGB(244, 236, 214)
 	signText.Font = Enum.Font.GothamMedium
 	signText.TextSize = 16
 	signText.Text = "Лавка\nБатон 250\nКуртка 500   1\nСвисток 350   2\nЭнергетик 200   3"
@@ -489,38 +506,38 @@ local function buildWorld()
 	local titlePart = part({
 		name = "Title",
 		size = Vector3.new(1, 1, 1),
-		cf = CFrame.new(0, 16, 0),
+		cf = CFrame.new(0, 8, -18),
 		transparency = 1,
 		collide = false,
 		query = false,
 	})
 	local title = Instance.new("BillboardGui")
-	title.Size = UDim2.fromOffset(240, 60)
-	title.AlwaysOnTop = false
+	title.Size = UDim2.fromOffset(280, 70)
 	title.Parent = titlePart
 	local titleText = Instance.new("TextLabel")
 	titleText.Size = UDim2.fromScale(1, 1)
 	titleText.BackgroundTransparency = 1
 	titleText.Font = Enum.Font.GothamBold
-	titleText.TextSize = 42
-	titleText.TextColor3 = Color3.fromRGB(92, 64, 36)
-	titleText.Text = "ЯМА"
+	titleText.TextSize = 48
+	titleText.TextColor3 = Color3.fromRGB(48, 78, 46)
+	titleText.TextStrokeTransparency = 0.6
+	titleText.Text = "ПАРК"
 	titleText.Parent = title
 
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "LobbySpawn"
-	spawn.Size = Vector3.new(8, 1, 8)
-	spawn.CFrame = CFrame.new(0, 24.6, 104)
+	spawn.Size = Vector3.new(10, 1, 10)
+	spawn.CFrame = CFrame.new(0, 5.2, 125)
 	spawn.Anchored = true
 	spawn.Neutral = true
 	spawn.Duration = 0
-	spawn.Color = Color3.fromRGB(214, 176, 122)
-	spawn.Material = Enum.Material.WoodPlanks
+	spawn.Color = Color3.fromRGB(186, 176, 160)
+	spawn.Material = Enum.Material.Cobblestone
 	spawn.TopSurface = Enum.SurfaceType.Smooth
 	spawn.Parent = mapFolder
 	local spawnTexture = Instance.new("Texture")
 	spawnTexture.Face = Enum.NormalId.Top
-	spawnTexture.Texture = TEX.wood
+	spawnTexture.Texture = TEX.pebble
 	spawnTexture.StudsPerTileU = 3
 	spawnTexture.StudsPerTileV = 3
 	spawnTexture.Parent = spawn
@@ -528,14 +545,14 @@ end
 
 local function pitCFrame(index)
 	local angle = (index % 8) / 8 * math.pi * 2
-	local pos = Vector3.new(math.cos(angle) * 46, 4, math.sin(angle) * 46)
-	return CFrame.lookAt(pos, Vector3.new(0, 4, 0))
+	local pos = Vector3.new(math.cos(angle) * 46, 6, math.sin(angle) * 46)
+	return CFrame.lookAt(pos, Vector3.new(0, 6, 0))
 end
 
 local function lobbyCFrame(index)
 	local angle = (index % 10) / 10 * math.pi * 2
-	local pos = Vector3.new(math.cos(angle) * 104, 27, math.sin(angle) * 104)
-	return CFrame.lookAt(pos, Vector3.new(0, 26, 0))
+	local pos = Vector3.new(math.cos(angle) * 125, 7, math.sin(angle) * 125)
+	return CFrame.lookAt(pos, Vector3.new(0, 5, 0))
 end
 
 local function newState()
@@ -2418,7 +2435,7 @@ end)
     <Item class="LocalScript" referent="6">
       <Properties>
         <string name="Name">YamaClient</string>
-        <ProtectedString name="Source"><![CDATA[-- Яма. LocalScript в StarterPlayerScripts. Камера, прицел и кнопки.
+        <ProtectedString name="Source"><![CDATA[-- Парк. LocalScript в StarterPlayerScripts. Камера, прицел и кнопки.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -2429,11 +2446,16 @@ local pickRemote = ReplicatedStorage:WaitForChild("YamaPick")
 local actionRemote = ReplicatedStorage:WaitForChild("YamaAction")
 local stateRemote = ReplicatedStorage:WaitForChild("YamaState")
 
+local INK = Color3.fromRGB(36, 48, 34)
+local CREAM = Color3.fromRGB(244, 238, 224)
+local MOSS = Color3.fromRGB(74, 112, 72)
+local PAPER = Color3.fromRGB(252, 248, 238)
+
 local CHOICES = {
-	{ id = "dictor", name = "Диктор", line = "Реплика, пауза и луч", color = Color3.fromRGB(92, 154, 230) },
-	{ id = "tumba", name = "Тумба", line = "Врастает, баш на удар", color = Color3.fromRGB(198, 114, 66) },
-	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа» и толчок", color = Color3.fromRGB(224, 198, 92) },
-	{ id = "dvornik", name = "Дворник", line = "Тумбы, полив, струя", color = Color3.fromRGB(86, 168, 112) },
+	{ id = "dictor", name = "Диктор", line = "Реплика, пауза и луч", color = Color3.fromRGB(86, 138, 186) },
+	{ id = "tumba", name = "Тумба", line = "Врастает, баш на удар", color = Color3.fromRGB(176, 112, 72) },
+	{ id = "otrazhatel", name = "Отражатель", line = "Окно «опа» и толчок", color = Color3.fromRGB(196, 164, 72) },
+	{ id = "dvornik", name = "Дворник", line = "Тумбы, полив, струя", color = Color3.fromRGB(78, 146, 96) },
 }
 
 local KEYS = {
@@ -2454,8 +2476,16 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 local function corner(parent, radius)
 	local ui = Instance.new("UICorner")
-	ui.CornerRadius = UDim.new(0, radius or 8)
+	ui.CornerRadius = UDim.new(0, radius or 10)
 	ui.Parent = parent
+end
+
+local function stroke(parent, color, thickness)
+	local line = Instance.new("UIStroke")
+	line.Color = color or MOSS
+	line.Thickness = thickness or 1.5
+	line.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	line.Parent = parent
 end
 
 local function label(parent, size, pos, text, fontSize)
@@ -2466,166 +2496,173 @@ local function label(parent, size, pos, text, fontSize)
 	item.Font = Enum.Font.Gotham
 	item.TextSize = fontSize or 14
 	item.TextXAlignment = Enum.TextXAlignment.Left
-	item.TextColor3 = Color3.fromRGB(240, 240, 240)
+	item.TextColor3 = INK
 	item.Text = text or ""
 	item.Parent = parent
 	return item
 end
 
-local status = label(gui, UDim2.new(1, 0, 0, 28), UDim2.fromOffset(0, 18), "Выбери бойца", 20)
-status.TextXAlignment = Enum.TextXAlignment.Center
+local function panel(size, pos)
+	local frame = Instance.new("Frame")
+	frame.Size = size
+	frame.Position = pos
+	frame.BackgroundColor3 = CREAM
+	frame.BackgroundTransparency = 0.08
+	frame.BorderSizePixel = 0
+	frame.Parent = gui
+	corner(frame, 12)
+	stroke(frame, MOSS, 1.5)
+	return frame
+end
+
+local banner = panel(UDim2.fromOffset(460, 62), UDim2.new(0.5, -230, 0, 16))
+local status = label(banner, UDim2.new(1, -24, 0, 26), UDim2.fromOffset(12, 6), "Выбери бойца", 18)
 status.Font = Enum.Font.GothamBold
-
-local timer = label(gui, UDim2.new(1, 0, 0, 22), UDim2.fromOffset(0, 46), "", 16)
+status.TextXAlignment = Enum.TextXAlignment.Center
+local timer = label(banner, UDim2.new(1, -24, 0, 20), UDim2.fromOffset(12, 32), "", 16)
 timer.TextXAlignment = Enum.TextXAlignment.Center
-timer.TextColor3 = Color3.fromRGB(255, 214, 150)
+timer.TextColor3 = Color3.fromRGB(96, 78, 42)
 
-local panel = Instance.new("Frame")
-panel.Size = UDim2.fromOffset(220, 150)
-panel.Position = UDim2.fromOffset(16, 78)
-panel.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
-panel.BackgroundTransparency = 0.15
-panel.Parent = gui
-corner(panel, 10)
-
-local nameLabel = label(panel, UDim2.new(1, -16, 0, 22), UDim2.fromOffset(10, 8), "Боец", 18)
+local card = panel(UDim2.fromOffset(250, 156), UDim2.fromOffset(16, 92))
+local nameLabel = label(card, UDim2.new(1, -20, 0, 24), UDim2.fromOffset(12, 8), "Боец", 18)
 nameLabel.Font = Enum.Font.GothamBold
-local levelLabel = label(panel, UDim2.new(1, -16, 0, 18), UDim2.fromOffset(10, 30), "", 14)
-local hpBack = Instance.new("Frame")
-hpBack.Size = UDim2.new(1, -20, 0, 12)
-hpBack.Position = UDim2.fromOffset(10, 56)
-hpBack.BackgroundColor3 = Color3.fromRGB(40, 24, 24)
-hpBack.BorderSizePixel = 0
-hpBack.Parent = panel
-local hpFill = Instance.new("Frame")
-hpFill.Size = UDim2.fromScale(1, 1)
-hpFill.BackgroundColor3 = Color3.fromRGB(196, 72, 64)
-hpFill.BorderSizePixel = 0
-hpFill.Parent = hpBack
-local manaBack = Instance.new("Frame")
-manaBack.Size = UDim2.new(1, -20, 0, 8)
-manaBack.Position = UDim2.fromOffset(10, 74)
-manaBack.BackgroundColor3 = Color3.fromRGB(24, 28, 48)
-manaBack.BorderSizePixel = 0
-manaBack.Parent = panel
-local manaFill = Instance.new("Frame")
-manaFill.Size = UDim2.fromScale(1, 1)
-manaFill.BackgroundColor3 = Color3.fromRGB(90, 140, 230)
-manaFill.BorderSizePixel = 0
-manaFill.Parent = manaBack
-local goldLabel = label(panel, UDim2.new(1, -16, 0, 18), UDim2.fromOffset(10, 90), "0 золота", 14)
-goldLabel.TextColor3 = Color3.fromRGB(230, 196, 110)
-local killLabel = label(panel, UDim2.new(1, -16, 0, 18), UDim2.fromOffset(10, 112), "0 убийств", 14)
+local levelLabel = label(card, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 32), "", 13)
+levelLabel.TextColor3 = Color3.fromRGB(78, 92, 70)
 
-local board = Instance.new("Frame")
-board.Size = UDim2.fromOffset(240, 180)
-board.Position = UDim2.new(1, -256, 0, 78)
-board.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
-board.BackgroundTransparency = 0.15
-board.Parent = gui
-corner(board, 10)
-local boardTitle = label(board, UDim2.new(1, -16, 0, 20), UDim2.fromOffset(10, 8), "Счёт", 16)
+local function bar(parent, y, backColor, fillColor)
+	local back = Instance.new("Frame")
+	back.Size = UDim2.new(1, -24, 0, 12)
+	back.Position = UDim2.fromOffset(12, y)
+	back.BackgroundColor3 = backColor
+	back.BorderSizePixel = 0
+	back.Parent = parent
+	corner(back, 6)
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = fillColor
+	fill.BorderSizePixel = 0
+	fill.Parent = back
+	corner(fill, 6)
+	return fill
+end
+
+local hpFill = bar(card, 56, Color3.fromRGB(214, 176, 168), Color3.fromRGB(186, 78, 68))
+local manaFill = bar(card, 74, Color3.fromRGB(176, 196, 206), Color3.fromRGB(72, 132, 164))
+local goldLabel = label(card, UDim2.new(1, -20, 0, 18), UDim2.fromOffset(12, 96), "0 золота", 14)
+goldLabel.TextColor3 = Color3.fromRGB(128, 88, 36)
+local killLabel = label(card, UDim2.new(1, -20, 0, 18), UDim2.fromOffset(12, 118), "0 убийств", 14)
+
+local board = panel(UDim2.fromOffset(250, 196), UDim2.new(1, -266, 0, 92))
+local boardTitle = label(board, UDim2.new(1, -20, 0, 22), UDim2.fromOffset(12, 8), "Счёт", 16)
 boardTitle.Font = Enum.Font.GothamBold
 local boardRows = {}
 for index = 1, 8 do
-	boardRows[index] = label(board, UDim2.new(1, -16, 0, 16), UDim2.fromOffset(10, 30 + (index - 1) * 18), "", 13)
+	boardRows[index] = label(board, UDim2.new(1, -20, 0, 16), UDim2.fromOffset(12, 34 + (index - 1) * 19), "", 13)
 end
 
 local function abilityBox(x, keyName, titleText)
 	local box = Instance.new("Frame")
-	box.Size = UDim2.fromOffset(92, 64)
-	box.Position = UDim2.new(0.5, x, 1, -88)
-	box.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+	box.Size = UDim2.fromOffset(118, 74)
+	box.Position = UDim2.new(0.5, x, 1, -108)
+	box.BackgroundColor3 = PAPER
+	box.BorderSizePixel = 0
 	box.Parent = gui
-	corner(box, 8)
-	local key = label(box, UDim2.new(1, -8, 0, 18), UDim2.fromOffset(6, 4), keyName, 12)
-	key.TextColor3 = Color3.fromRGB(180, 180, 190)
-	local title = label(box, UDim2.new(1, -8, 0, 18), UDim2.fromOffset(6, 22), titleText, 16)
+	corner(box, 12)
+	stroke(box, MOSS, 1.5)
+	local badge = Instance.new("TextLabel")
+	badge.Size = UDim2.fromOffset(28, 20)
+	badge.Position = UDim2.fromOffset(8, 8)
+	badge.BackgroundColor3 = MOSS
+	badge.TextColor3 = PAPER
+	badge.Font = Enum.Font.GothamBold
+	badge.TextSize = 13
+	badge.Text = keyName
+	badge.Parent = box
+	corner(badge, 6)
+	local title = label(box, UDim2.new(1, -46, 0, 22), UDim2.fromOffset(40, 8), titleText, 16)
 	title.Font = Enum.Font.GothamBold
-	local cd = label(box, UDim2.new(1, -8, 0, 16), UDim2.fromOffset(6, 42), "", 13)
-	cd.TextColor3 = Color3.fromRGB(255, 200, 120)
+	local cd = label(box, UDim2.new(1, -16, 0, 18), UDim2.fromOffset(10, 42), "", 14)
+	cd.TextColor3 = Color3.fromRGB(96, 78, 42)
 	return { frame = box, title = title, cd = cd }
 end
 
 local boxes = {
-	q = abilityBox(-160, "Q", "Реплика"),
-	e = abilityBox(-52, "E", "Пауза"),
-	r = abilityBox(56, "R", "Эфир"),
+	q = abilityBox(-196, "Q", "Реплика"),
+	e = abilityBox(-66, "E", "Пауза"),
+	r = abilityBox(64, "R", "Эфир"),
 }
 
-local help = label(gui, UDim2.new(1, 0, 0, 18), UDim2.new(0, 0, 1, -22), "ЛКМ удар    Q E R способности    1 куртка  2 свисток  3 энергетик    F хомяк", 13)
+local help = label(gui, UDim2.new(1, -32, 0, 18), UDim2.new(0, 16, 1, -26), "ЛКМ удар     Q E R способности     1 куртка   2 свисток   3 энергетик     F хомяк", 13)
 help.TextXAlignment = Enum.TextXAlignment.Center
-help.TextColor3 = Color3.fromRGB(180, 180, 186)
+help.TextColor3 = PAPER
+help.TextStrokeTransparency = 0.45
+help.TextStrokeColor3 = INK
 
 local cross = Instance.new("Frame")
-cross.Size = UDim2.fromOffset(8, 8)
+cross.Size = UDim2.fromOffset(16, 16)
 cross.AnchorPoint = Vector2.new(0.5, 0.5)
 cross.Position = UDim2.fromScale(0.5, 0.5)
-cross.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-cross.BackgroundTransparency = 0.25
-cross.BorderSizePixel = 0
+cross.BackgroundTransparency = 1
 cross.Parent = gui
+stroke(cross, PAPER, 1.5)
 corner(cross, 8)
 
-local shop = Instance.new("Frame")
-shop.Size = UDim2.fromOffset(280, 168)
-shop.Position = UDim2.new(0.5, -140, 0.5, -90)
-shop.BackgroundColor3 = Color3.fromRGB(18, 16, 20)
+local shop = panel(UDim2.fromOffset(250, 188), UDim2.fromOffset(16, 260))
 shop.Visible = false
-shop.Parent = gui
-corner(shop, 10)
-local shopTitle = label(shop, UDim2.new(1, -16, 0, 22), UDim2.fromOffset(10, 8), "Лавка", 18)
+local shopTitle = label(shop, UDim2.new(1, -20, 0, 22), UDim2.fromOffset(12, 8), "Лавка", 18)
 shopTitle.Font = Enum.Font.GothamBold
 
 local shopButtons = {}
 local shopItems = {
-	{ id = "baton", name = "Батон 250", y = 36 },
-	{ id = "jacket", name = "Куртка 500", y = 68 },
-	{ id = "whistle", name = "Свисток 350", y = 100 },
-	{ id = "energy", name = "Энергетик 200", y = 132 },
+	{ id = "baton", name = "Батон  250", y = 38 },
+	{ id = "jacket", name = "Куртка  500", y = 74 },
+	{ id = "whistle", name = "Свисток  350", y = 110 },
+	{ id = "energy", name = "Энергетик  200", y = 146 },
 }
 for _, spec in shopItems do
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, -20, 0, 28)
-	button.Position = UDim2.fromOffset(10, spec.y)
-	button.BackgroundColor3 = Color3.fromRGB(72, 56, 36)
-	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Size = UDim2.new(1, -24, 0, 30)
+	button.Position = UDim2.fromOffset(12, spec.y)
+	button.BackgroundColor3 = MOSS
+	button.TextColor3 = PAPER
 	button.Font = Enum.Font.GothamMedium
 	button.TextSize = 14
 	button.Text = spec.name
+	button.AutoButtonColor = true
 	button.Parent = shop
-	corner(button, 6)
+	corner(button, 8)
 	button.MouseButton1Click:Connect(function()
 		actionRemote:FireServer("buy_" .. spec.id, Vector3.zero)
 	end)
 	shopButtons[spec.id] = button
 end
 
-local picker = Instance.new("Frame")
-picker.Size = UDim2.fromOffset(560, 220)
-picker.Position = UDim2.new(0.5, -280, 0.5, -110)
-picker.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
-picker.Parent = gui
-corner(picker, 12)
-local pickTitle = label(picker, UDim2.new(1, -20, 0, 28), UDim2.fromOffset(12, 10), "Кто выходит в яму", 20)
+local picker = panel(UDim2.fromOffset(640, 250), UDim2.new(0.5, -320, 0.5, -125))
+local pickTitle = label(picker, UDim2.new(1, -24, 0, 28), UDim2.fromOffset(16, 12), "Кто выходит в парк", 22)
 pickTitle.Font = Enum.Font.GothamBold
 
 for index, choice in CHOICES do
 	local button = Instance.new("TextButton")
-	button.Size = UDim2.fromOffset(124, 150)
-	button.Position = UDim2.fromOffset(16 + (index - 1) * 136, 50)
-	button.BackgroundColor3 = choice.color
+	button.Size = UDim2.fromOffset(144, 180)
+	button.Position = UDim2.fromOffset(16 + (index - 1) * 156, 50)
+	button.BackgroundColor3 = PAPER
 	button.Text = ""
 	button.AutoButtonColor = true
 	button.Parent = picker
-	corner(button, 8)
-	local title = label(button, UDim2.new(1, -12, 0, 48), UDim2.fromOffset(6, 16), choice.name, 18)
+	corner(button, 12)
+	stroke(button, choice.color, 2)
+	local stripe = Instance.new("Frame")
+	stripe.Size = UDim2.new(1, 0, 0, 8)
+	stripe.BackgroundColor3 = choice.color
+	stripe.BorderSizePixel = 0
+	stripe.Parent = button
+	corner(stripe, 8)
+	local title = label(button, UDim2.new(1, -16, 0, 48), UDim2.fromOffset(10, 28), choice.name, 20)
 	title.Font = Enum.Font.GothamBold
 	title.TextWrapped = true
-	title.TextColor3 = Color3.fromRGB(16, 16, 16)
-	local line = label(button, UDim2.new(1, -12, 0, 48), UDim2.fromOffset(6, 70), choice.line, 13)
+	local line = label(button, UDim2.new(1, -16, 0, 56), UDim2.fromOffset(10, 84), choice.line, 14)
 	line.TextWrapped = true
-	line.TextColor3 = Color3.fromRGB(28, 24, 20)
+	line.TextColor3 = Color3.fromRGB(78, 92, 70)
 	button.MouseButton1Click:Connect(function()
 		pickRemote:FireServer(choice.id)
 	end)
@@ -2656,14 +2693,18 @@ local function ratio(value, maxValue)
 	return math.clamp(value / maxValue, 0, 1)
 end
 
-local function cdText(seconds, locked, lockLabel)
+local function paintBox(box, titleText, seconds, locked, lockLabel)
+	box.title.Text = titleText
 	if locked then
-		return lockLabel
+		box.cd.Text = lockLabel
+		box.frame.BackgroundColor3 = Color3.fromRGB(214, 208, 196)
+	elseif seconds and seconds > 0.05 then
+		box.cd.Text = string.format("%.0f", math.ceil(seconds))
+		box.frame.BackgroundColor3 = Color3.fromRGB(226, 214, 190)
+	else
+		box.cd.Text = "готово"
+		box.frame.BackgroundColor3 = PAPER
 	end
-	if seconds and seconds > 0.05 then
-		return string.format("%.0f", math.ceil(seconds))
-	end
-	return "готово"
 end
 
 local function applyState(packet)
@@ -2676,7 +2717,7 @@ local function applyState(packet)
 	elseif packet.phase == "countdown" then
 		timer.Text = "старт"
 	else
-		timer.Text = ""
+		timer.Text = "парк открыт"
 	end
 	local you = packet.you
 	local picked = you and you.fighter
@@ -2687,26 +2728,23 @@ local function applyState(packet)
 		if you.level >= 6 then
 			levelLabel.Text = "уровень 6"
 		else
-			levelLabel.Text = string.format("уровень %d   %d/%d", you.level, you.xp, nextXp)
+			levelLabel.Text = string.format("уровень %d    %d/%d", you.level, you.xp, nextXp)
 		end
 		hpFill.Size = UDim2.fromScale(ratio(you.hp, you.maxHp), 1)
 		manaFill.Size = UDim2.fromScale(ratio(you.mana, you.maxMana), 1)
 		local extra = ""
 		if you.shield and you.shield > 0 then
-			extra = "   щит " .. you.shield
+			extra = "    щит " .. you.shield
 		end
 		if you.rooted then
-			extra ..= "   врос"
+			extra ..= "    врос"
 		end
 		goldLabel.Text = tostring(you.gold) .. " золота" .. extra
-		killLabel.Text = tostring(you.kills) .. " убийств, смертей " .. tostring(you.deaths)
+		killLabel.Text = tostring(you.kills) .. " убийств    смертей " .. tostring(you.deaths)
 		local names = NAMES[you.fighter] or { "Q", "E", "R" }
-		boxes.q.title.Text = names[1]
-		boxes.e.title.Text = names[2]
-		boxes.r.title.Text = names[3]
-		boxes.q.cd.Text = cdText(you.cd.q, false, "")
-		boxes.e.cd.Text = cdText(you.cd.e, you.lockE, "ур. 2")
-		boxes.r.cd.Text = cdText(you.cd.r, you.lockR, "ур. 4")
+		paintBox(boxes.q, names[1], you.cd.q, false, "")
+		paintBox(boxes.e, names[2], you.cd.e, you.lockE, "со 2 уровня")
+		paintBox(boxes.r, names[3], you.cd.r, you.lockR, "с 4 уровня")
 		shop.Visible = you.nearShop == true and packet.phase == "fight" and not picker.Visible
 		local ownedText = {
 			baton = "Батон есть",
@@ -2715,27 +2753,30 @@ local function applyState(packet)
 			energy = "Энергетик есть",
 		}
 		local priceText = {
-			baton = "Батон 250",
-			jacket = "Куртка 500",
-			whistle = "Свисток 350",
-			energy = "Энергетик 200",
+			baton = "Батон  250",
+			jacket = "Куртка  500",
+			whistle = "Свисток  350",
+			energy = "Энергетик  200",
 		}
 		for id, button in shopButtons do
 			local owned = you.items and you.items[id]
 			button.Text = owned and ownedText[id] or priceText[id]
+			button.BackgroundColor3 = owned and Color3.fromRGB(120, 132, 112) or MOSS
 			button.AutoButtonColor = not owned
 		end
 	else
 		nameLabel.Text = "Боец не выбран"
-		levelLabel.Text = ""
+		levelLabel.Text = "выбери карточку"
 		goldLabel.Text = ""
 		killLabel.Text = ""
+		hpFill.Size = UDim2.fromScale(0, 1)
+		manaFill.Size = UDim2.fromScale(0, 1)
 		shop.Visible = false
 	end
 	for index = 1, 8 do
 		local row = packet.board and packet.board[index]
 		if row then
-			boardRows[index].Text = string.format("%d  %s  %s", row.kills or 0, row.fighter or "", row.name or "")
+			boardRows[index].Text = string.format("%d    %s    %s", row.kills or 0, row.fighter or "", row.name or "")
 		else
 			boardRows[index].Text = ""
 		end
@@ -2762,9 +2803,9 @@ local function bindCamera(character)
 	if not humanoid then
 		return
 	end
-	humanoid.CameraOffset = Vector3.new(2.2, 1.4, 0)
+	humanoid.CameraOffset = Vector3.new(2.2, 1.6, 0)
 	player.CameraMinZoomDistance = 12
-	player.CameraMaxZoomDistance = 22
+	player.CameraMaxZoomDistance = 24
 	local camera = workspace.CurrentCamera
 	camera.CameraSubject = humanoid
 	camera.CameraType = Enum.CameraType.Custom
@@ -2814,8 +2855,7 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 	end
-end)
-]]></ProtectedString>
+end)]]></ProtectedString>
       </Properties>
     </Item>
     </Item>
