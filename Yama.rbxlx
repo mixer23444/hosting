@@ -2558,4 +2558,16 @@ end)
     </Item>
     </Item>
   </Item>
+  <Item class="Chat" referent="7">
+    <Properties>
+      <string name="Name">Chat</string>
+      <bool name="LoadDefaultChat">false</bool>
+    </Properties>
+  </Item>
+  <Item class="TextChatService" referent="8">
+    <Properties>
+      <string name="Name">TextChatService</string>
+      <token name="ChatVersion">1</token>
+    </Properties>
+  </Item>
 </roblox>
