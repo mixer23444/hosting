@@ -1,0 +1,74 @@
+{
+  "name": "GarazhRace",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "ProfileService": {
+        "$path": "src/server/ProfileService.luau"
+      },
+      "RaceServer": {
+        "$path": "src/server/race"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "CameraMaxZoomDistance": 100,
+        "CameraMinZoomDistance": 6
+      },
+      "StarterPlayerScripts": {
+        "RaceClient": {
+          "$path": "src/client/race"
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "Future",
+        "ClockTime": 14.4,
+        "GeographicLatitude": 46,
+        "Brightness": 2.2,
+        "EnvironmentDiffuseScale": 0.4,
+        "EnvironmentSpecularScale": 0.5,
+        "GlobalShadows": true,
+        "OutdoorAmbient": [0.48, 0.5, 0.52],
+        "Ambient": [0.14, 0.14, 0.15],
+        "ShadowSoftness": 0.18
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "SkyboxBk": "rbxassetid://271042516",
+          "SkyboxDn": "rbxassetid://271077243",
+          "SkyboxFt": "rbxassetid://271042556",
+          "SkyboxLf": "rbxassetid://271042310",
+          "SkyboxRt": "rbxassetid://271042467",
+          "SkyboxUp": "rbxassetid://271077958",
+          "SunAngularSize": 16,
+          "StarCount": 0,
+          "CelestialBodiesShown": true
+        }
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.22,
+          "Offset": 0.1,
+          "Color": [0.74, 0.78, 0.84],
+          "Decay": [0.5, 0.56, 0.62],
+          "Glare": 0.1,
+          "Haze": 0.9
+        }
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
